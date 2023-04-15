@@ -1,0 +1,54 @@
+create a scripted pipeline
+
+++new item
+
+Select pipeline 
+
+Go to pipeline and paste
+
+pipeline{
+	agent any
+	tools{
+	     maven 'akshay-maven'
+	}
+    stages{
+	 stage("checkout"){
+	 	steps{
+		  git url: ‘https://github.com/akshay451995/DevOpsClassCodes.git’
+		}
+	 }
+	 stage("codecompile"){
+	     steps{
+	         sh "mvn compile"
+	     }
+	 }
+	 stage("codetesting"){
+	     steps{
+	         sh "mvn test"
+	         echo "testing was done"
+	     }
+	 }
+	 stage("codeQA"){
+	     steps{
+	         sh "mvn pmd:pmd"
+	     }
+	 }
+	 stage("package"){
+	     steps{
+	         sh "mvn package"
+	     }
+	 }
+    }
+}
+
+
+
+
+Build the pipeline
+
+
+
+
+Automating infrastructure using terraform
+Build a docker Jenkins pipeline to implement ci/cd workflow
+

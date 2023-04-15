@@ -1,0 +1,261 @@
+demo Lab for Ansible
+
+1)	Create 3 Ec2 machine name them as : Ansibleserver
+Node1 and node2
+
+
+2)	Go to software Mobaxterm and there login into all the three machines
+3)	In Ansible machine/ansible server only :
+	sudo su
+	yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+	yum update -y
+	yum install git python python-level python-pip openssl ansible -y
+	ansible --version
+	vi /etc/ansible/hosts
+
+press i 
+## Add the below content in the hosts file…make sure you copy paste the correct ip
+[demo] 
+<<private ip of the machine1>>
+<<private ip of the machine2>>
+
+press esc :wq
+
+  	vi /etc/ansible/ansible.cfg
+press i
+
+Remove # from inventory (line 14) 
+Remove # from sudo-user (line 22)
+
+esc and :wq
+
+4) >>>>>>>do this step in all the nodes and ansible machine  <<<<<<<
+	adduser ansible   
+# create a user with the name ansible
+	passwd ansible     
+#setting up the password for the user ansible
+(now set the password)
+	
+## Now we need to provide the authentication rights to the ansible user. So that the ansible user can perform sudo commands …
+
+visudo
+press i
+scroll down and find  #All root to run any command ....
+
+now there add 
+ansible ALL=(ALL) NOPASSWD: ALL    (Add this below root)  
+(line number: 101) 
+
+5) Do this step in ansible server only:
+	su - ansible 
+## su ansible means that you want to login as ansible user
+	sudo yum install httpd -y
+# we are checking that are we able to install a software httpd via ansible user 
+           sudo yum remove httpd -y
+
+            exit 
+#exit will exit from the ansible user 
+	
+6) Do this step in ansible and node servers
+
+	vi /etc/ssh/sshd_config
+press i
+in authentication,
+uncomment Permit root login yes
+(remove #)   (line number 38) 
+scroll down and uncomment password authentication yes(by removing #) (line61) 
+and comment password authentication no
+(by putting #)(line 63) 
+
+7) do this for nodes and ansible server
+	service sshd restart
+
+8)In ansible server: 
+	##Login as a ansible user 
+su - ansible
+## Trying to connect with node1 . you can copy paste the private ip of node1 from aws management console
+	ssh <<private ip of node1>>
+	touch fileinnode1 file1innode1
+	exit
+Now go to node 1
+       su - ansible
+	ls
+check if fileinnode1 and file1innode1 is there 
+Again come back to ansible server
+su - ansible	
+ssh <<private ip of node2>>
+	touch fileinnode2 file1innode2
+	exit
+Now go to node 2
+su - ansible
+	ls
+check if fileinnode2 and file1innode2 is there 
+
+###########################REMOVE PASSWORD AUTHENTICATION USING TRUST RELATIONSHIP#########################
+
+9) Go to ansible server  (you need to ensure that you are logged in as ansible user) 
+	ssh-keygen  (press enter - enter - enter) 
+	ls -a
+	cd .ssh/
+	ls
+	ssh-copy-id ansible@<<private ip of node1>>
+password : last time it will ask for pass
+	ssh-copy-id ansible@<<private ip of node2>>
+password : last time it will ask for pass
+	cd ..
+	ssh <<private ip of node1>>
+	exit
+	ssh <<private ip of node 2>>
+	exit
+	
+
+##########################################HOST PATTERN###########################################
+
+10) Do this in ansible machine	
+	ansible all --list-hosts
+	ansible demo --list-hosts
+#show me the hosts within the demo group 
+
+################################################ADHOC COMMANDS ########################################
+
+11) Go to ansible server
+	ansible demo -a "ls"
+	ansible all -a "touch fileinallnodes"
+	ansible demo -a "sudo yum install httpd -y"
+
+12) numbering of nodes: to copy files only on to a single node
+example:
+[nodes]
+<privateip> [0]
+<privateip> [1]
+<privateip> [2]...
+the first ip address would be automatically numbered as zero and subsequent numbers to the 
+next nodes
+
+13) playbooks: 
+written in YAML: yet another markup language
+playbook example: 
+--- 
+- hosts: <hostgroupname>
+  user: ansible
+  become: yes
+  connection: ssh
+  tasks: 
+  - name: install httpd on linux 
+    action: yum name=httpd state=installed
+  - name: install docker in node1 and node2
+    action: yum name=docker state=installed
+(save and quitplaybook):wq
+
+command to run a playbook: 
+ansible-playbook <playbookname.yml>
+
+14) VAULT: 
+ansible-vault create <playbookname.yml> (to create vaulted playbook)
+asnible-vault edit <playbookname.yml> (to edit files after creating)
+
+ansible-playbook <playbookname.yml> --ask-vault-pass
+
+
+ADHOC commands: are linux based commands (no idempotency with adhoc commands)
+modules: commands to perform specific tasks 
+playbooks: listed document of all the activities that need too be performed in the nodes
+
+
+idempotency (ansible will check and skip the tasks which are already present in the server)
+
+
+
+
+
+
+
+---
+- hosts: all
+  gather_facts: no
+  remote_user: ansible
+  tasks:
+    - name: Test connection
+      ping:
+      remote_user: ansible
+
+to install docker in nodes by ansible user
+
+--- #Target and task playbook
+- hosts: demo
+  user: ansible
+  become: yes
+  connection: ssh
+  tasks:
+     - name: Install docker on linux
+       action: yum name=docker state=installed
+
+
+
+
+SELF NOTES
+
+1) launch ec-2 instances named as master and nodes and set hostnames
+2) in ansible server, install ansible using yum install ansible
+3) add hosts in ansible hosts file
+
+    vi /etc/ansible/hosts
+[hostgroupname]
+<<private ip's of nodes>>
+
+4) change settings in ansible config file
+    
+    vi /etc/ansible/ansible.cfg
+inventory line remove # (uncomment the line)
+sudo user line remove # (uncomment the line)
+
+save and quit
+
+5) create ansible user in all machines master and nodes
+
+useradd ansible
+passwd ansible
+
+give sudo rights
+    visudo (101 line)
+change permit root login and password authentication to yes in /etc/ssh/sshd_config file
+    vi /etc/ssh/sshd_config
+uncomment permit root login and password authentication to yes
+systemctl restart sshd (restart sshd)
+
+6) generate keys in master server and copy into nodes
+login as ansible user and generate keys
+    ssh-keygen
+ passphrase empty (enter-enter-enter)
+
+ssh-copy-id ansible@<privateipofnodes> (to copy key into private ip of node)
+ssh <privateipofnode> (to login to the machine)
+
+7) Do this in ansible machine	
+	ansible all --list-hosts
+	ansible nodes --list-hosts
+#show me the hosts within the nodes group 
+
+################################################ADHOC COMMANDS ########################################
+
+8) Go to ansible server
+	ansible demo -a "ls"
+	ansible all -a "touch fileinallnodes"
+	ansible demo -a "sudo yum install httpd -y"
+
+
+9) playbooks to run using ansible user
+
+--- #Target and task playbook
+- hosts: demo
+  user: ansible
+  become: yes
+  connection: ssh
+  tasks:
+     - name: Install docker on linux
+       action: yum name=docker state=installed
+
+INSTALLING ANSIBLE ON LINUX AFTER PIP:
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py (installing latest python interpretor)
+python3 get-pip.py --user ( installing latest python interpretor)
+python3 -m pip install --user ansible (to install ansible)

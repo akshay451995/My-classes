@@ -1,0 +1,238 @@
+COURSE END PROJECT 2 - DOCKER JENKINS PIPELINE TO IMPLEMENT CI/CD WORKFLOW
+
+1) #Update the machine 
+sudo apt-get update -y
+
+2) # Command for installing Java 11
+sudo apt-get install default-jdk -y
+
+3) # Script for Jenkins installation
+
+#Add Repository key to the system
+wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
+
+# Append debian package repo address to the system
+echo deb http://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list
+
+# Install Jenkins
+sudo apt-get update
+sudo apt-get install jenkins -y
+sudo su
+service jenkins start 
+exit
+
+4) # Install git 
+sudo apt-get install git -y
+
+5) #install docker 
+sudo apt-get install docker.io -y
+sudo su
+service docker start 
+exit
+
+6) change permissions of the docker.sock file
+sudo chmod 666 /var/run/docker.sock
+
+7) #Create a new repository in the github account
+github repository name - djpipeline
+
+8) #Open jenkins on the local machine and create a new pipeline job
+Open web browser and in address bar:
+localhost:8080 (or <publicip>:8080)
+login jenkins with credentials
+
+(inside jenkins dashboard)
+-- create new item:
+        select pipeline and name the pipeline djpipeline and click ok
+
+9) configure the new pipeline job: 
+
+i) Add the description of the pipeline:
+Docker Jenkins Pipeline to implement CI/CD workflow
+
+ii) In the pipeline configure:
+    a) in definition: select Pipeline script from SCM
+    b) in SCM: select git 
+    c) in repositories URL: https://github.com/akshay451995/djpipeline.git
+    d) in Script Path: Jenkinsfile
+    e) click on Pipeline syntax to generate the syntax for login script for dockerhub login
+    (inside the pipeline syntax)
+    (i want to generate password variable for providing dockerhub password during 
+     dockerhub login)
+     f) click on Snippet Generator -- 
+       -- in Sample step-- select -- withCredentials: Bind credentials to variables
+       -- in bindings -- click on add -- select Secret text -- 
+       --in Variable -- write dockerhubp--(any variable name can be given in place of dockerhubp)--  
+       -- in Credentials -- click on add -- and select jenkins -- in kind-- select Secret 
+       text -- in Secret -- i have entered my dockerhub password -- in id i have given the 
+       same name as dockerhubp-- then click on add-- 
+      -- again inside the snippet generator click on Generate Pipeline Script below the 
+      bindings-- u get a script for performing the docker hub login for your scripted 
+      pipeline -- add this script to your pipeline script in the jenkins file in the step 
+      of performing dockerhub login-- 
+     g) now save the djpipeline configuration 
+
+10) #Create a repository in the server machine and enter it 
+
+mkdir djpipeline
+cd djpipeline
+
+11) create Dockerfile and Jenkinsfile inside the repository
+
+==> vi Dockerfile: (inside the Dockerfile)
+
+FROM ubuntu
+RUN echo "Built container successfully" > file1
+(save and quit the file)
+:wq
+(to build an image with ubuntu as base image with a file inside it named as file1 which 
+contains the message "Built container successfully")
+
+==> vi Jenkinsfile: (inside the Jenkinsfile write the pipeline script to create and build the 
+docker image using the Dockerfile from github, push the image to dockerhub repository, 
+pull the image from the dockerhub repository and create a contianer of the image)
+
+pipeline{
+    agent any
+    stages{
+        stage("checkout"){
+            steps{
+                git url: "https://github.com/akshay451995/djpipeline.git"
+            }
+        }
+        stage("build docker image from dockerfile"){
+            steps{
+                script{
+                    sh 'docker build -t akshay451995/myimage .'
+                }
+            }
+        }
+        stage("push image to docker hub"){
+            steps{
+                script{
+                    withCredentials([string(credentialsId: 'dockerhubp', variable: 'dockerhubp')]) {
+                        sh 'docker login -u akshay451995 -p ${dockerhubp}'
+}
+                sh 'docker push akshay451995/myimage'
+               }
+            }
+        }
+        stage("pulling image from dockerhub"){
+            steps{
+                script{
+                    sh 'docker pull akshay451995/myimage'
+                }
+           }      
+        }
+        stage("creating a container from the pulled image"){
+            steps{
+                script{
+                    sh 'docker run -dit --name container1 akshay451995/myimage'
+                }
+            }
+        }
+    }
+}
+
+(save and quit the file)
+:wq
+
+12) #Initialize git repository in the directory and push the files to the github account
+git init
+git add . 
+git commit -m "version1"
+git remote add origin https://github.com/akshay451995/djpipeline.git
+git push -u origin master 
+(write your username and password for the github account in the username and password prompt)
+
+13) click on build now in the djpipeline project and the build will be executed
+
+-- Go to the djpipeline configuration in Jenkins:
+   select the build triggers:
+   a) GitHub hook trigger for GITScm polling?
+   b) Poll SCM
+     (inside the Poll SCM)
+     Schedule 
+      * * * * *  
+   c) click on save
+(to run the jenkins check for every 1 minute to pull the code from github to build the 
+pipeline after every new commit made) 
+
+After each commit is made to the github a build is triggered in jenkins pipeline and the 
+pipeline builds the job -- in our casse the poll is scheduled for every 1 minute -- hence 
+it would take about 1 minute of time to trigger the build after the commit is done
+
+14) CHECK FOR SUBSEQUENT COMMITS AND BUILD TRIGGER FOR JENKINS:
+to check for the subsequent commits and build trigger, perform changes in the Dockerfile and 
+Jenkinsfile and commit the changes to the github repo and the pipeline executes the next build in
+about 1 minute of the commit
+
+Example: 
+perform the changes with a <new base image name> and a <new containername> in the Dockerfile and 
+Jenkinsfile and commit the changes -- build starts automatically in the jenkins pipeline:
+
+vi Dockerfile:
+FROM centos
+RUN echo "built container 2 successfully" > file1
+:wq
+
+vi Jenkinsfile:
+pipeline{
+    agent any
+    stages{
+        stage("checkout"){
+            steps{
+                git url: "https://github.com/akshay451995/djpipeline.git"
+            }
+        }
+        stage("build docker image from dockerfile"){
+            steps{
+                script{
+                    sh 'docker build -t akshay451995/myimage2 .'
+                }
+            }
+        }
+        stage("push image to docker hub"){
+            steps{
+                script{
+                    withCredentials([string(credentialsId: 'dockerhubp', variable: 'dockerhubp')]) {
+                        sh 'docker login -u akshay451995 -p ${dockerhubp}'
+}
+                sh 'docker push akshay451995/myimage2'
+               }
+            }
+        }
+        stage("pulling image from dockerhub"){
+            steps{
+                script{
+                    sh 'docker pull akshay451995/myimage2'
+                }
+           }      
+        }
+        stage("creating a container from the pulled image"){
+            steps{
+                script{
+                    sh 'docker run -dit --name container2 akshay451995/myimage2'
+                }
+            }
+        }
+    }
+}
+
+(save and quit the file)
+:wq
+
+15) commit the changes to the github repo
+
+git add . 
+git commit -m "version2"
+git push -u origin master
+(write your username and password for the github account in the username and password 
+prompt)
+
+16) check for the build in jenkins -- the build starts automatically in about 1 minute 
+after comitting
+
+
+###### SUCCESSFULLY COMPLETED BUILDING DOCKER JENKINS PIPELINE TO IMPLEMENT CI/CD WORKFLOW ######
+

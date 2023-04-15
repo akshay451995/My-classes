@@ -1,0 +1,41 @@
+pipeline{
+    agent any
+    stages{
+        stage("checkout"){
+            steps{
+                git url: "https://github.com/akshay451995/djpipeline.git"
+            }
+        }
+        stage("build docker image from dockerfile"){
+            steps{
+                script{
+                    sh 'docker build -t akshay451995/myimage .'
+                }
+            }
+        }
+        stage("push image to docker hub"){
+            steps{
+                script{
+                    withCredentials([string(credentialsId: 'dockerhubp', variable: 'dockerhubp')]) {
+                        sh 'docker login -u akshay451995 -p ${dockerhubp}'
+}
+                sh 'docker push akshay451995/myimage'
+               }
+            }
+        }
+        stage("pulling image from dockerhub"){
+            steps{
+                script{
+                    sh 'docker pull akshay451995/myimage'
+                }
+           }      
+        }
+        stage("creating a container from the pulled image"){
+            steps{
+                script{
+                    sh 'docker run -dit --name container2 akshay451995/myimage'
+                }
+            }
+        }
+    }
+}

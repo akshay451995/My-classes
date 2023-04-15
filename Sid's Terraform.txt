@@ -1,0 +1,154 @@
+TERRAFORM
+
+What is terraform?
+Terraform is called infrastructure as a code. Which is used to build your infrastructure (EC2) on any kind of cloud environment.
+
+How to install terraform?
+wget https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_linux_amd64.zip
+unzip terraform_0.12.24_linux_amd64.zip
+mv terraform /usr/local/sbin
+setup awscli on the same server and configure your security credentials
+
+Initial configuration for terraform?
+Choose one directory(any) as workspace and create a file called main.tf(any file name with .tf mandatory)
+provider "aws" {            
+ region = "us-east-2"
+}
+
+Terraform Workspace?
+Example: /root/terraform (any directory)
+All terraform script files should be ended with .tf extension.
+
+Now execute terraform init(command)
+resource "aws_instance" "web" {
+  ami           = "placeyouramiid"
+  instance_type = "t2.micro"
+key_name = “placeyourkeyname”
+subnet_id = “placeyoursubnetid”
+}
+This command will creates a project and install the provider plugin(example: AWS,azure,googlecloud..etc)
+################################################################################
+How to create EC2 instance using terraform ?
+Create a file (ex: ec2instance.tf) 
+
+#################################################################################
+ EC2 instance creation including VPC and subnet creation
+# Here aws_vpc is the resource name and main is the logical name for vpc and directly providing required cidr_block manually.
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+}
+
+ # Here aws_subnet is the resource name and mainsubnet is the logical name for subnet and directly providing required cidr_block manually.
+#Here vpc_id is declared by calling the above resource
+# "${aws_vpc.main.id}" here aws_vpc is resource name and main is the logical name of vpc
+ resource "aws_subnet" "mainsubnet" {
+  vpc_id     = "${aws_vpc.main.id}"
+  cidr_block = "10.0.1.0/24"
+}
+
+#Here EC2 instance is created by calling required arguments such as ami,instance_type,key_name,subnet_id
+# "${aws_subnet.mainsubnet.id}" here aws_subnet is the resource name and mainsubnet is the logical name of subnet.
+
+  resource "aws_instance" "ec2" {
+  ami           = "ami-0f7919c33c90f5b58"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "ec2vpc"
+  }
+  key_name = "amazonlinux"
+  subnet_id = "${aws_subnet.mainsubnet.id}"
+}
+EC2 instance creation with declared values in variables.tf file
+  resource "aws_instance" "ec2" {
+  ami           = "${var.ami_id}"
+  instance_type = "${var.instance_type}"
+
+  tags = {
+    Name = "ec2vpc"
+  }
+  key_name = "${var.key_name}"
+  subnet_id = "${var.subnet_id}"
+}
+
+
+variables.tf example
+variable ami_id {
+default = “amiid”
+}
+variable “instance_type” {
+default = “instancetype”
+}
+variable “key_name” {
+default = “keyname”
+}
+variable “subnet_id” {
+default = “subnetid”
+}
+
+
+Example command: 
+terraform apply   [this command will take the inputs from variables.tf]
+                                                    
+[OR]
+
+terraform apply -var “ami_id=amiid” -var “instance_type=instancetype” -var “key_name=keyname”  -var “subnet_id=subnetid”  [this command won’t go to variables.tf as we provided in runtime(given in command line itself)]
+
+
+EC2 instance creation without declared values in variables.tf file
+
+ resource "aws_instance" "ec2" {
+  ami           = "${var.ami_id}"
+  instance_type = "${var.instance_type}"
+
+  tags = {
+    Name = "ec2vpc"
+  }
+  key_name = "${var.key_name}"
+  subnet_id = "${var.subnet_id}"
+}
+
+
+variables.tf example
+variable ami_id {
+}
+variable “instance_type” {
+}
+variable “key_name” {
+}
+variable “subnet_id” {
+}
+
+
+Example command: 
+terraform apply   [this command will now ask for the inputs]
+                                                    
+[OR]
+
+terraform apply -var “ami_id=amiid” -var “instance_type=instancetype” -var “key_name=keyname”  -var “subnet_id=subnetid”  [this command won’t go to variables.tf as we provided in runtime(given in command line itself)]
+
+
+
+
+EC2 instance creation with .tfvars file
+
+ resource "aws_instance" "ec2" {
+  ami           = "${var.ami_id}"
+  instance_type = "${var.instance_type}"
+
+  tags = {
+    Name = "ec2vpc"
+  }
+  key_name = "${var.key_name}"
+  subnet_id = "${var.subnet_id}"
+}
+
+
+dev.tfvars
+ami_id = amiid
+instance_type = instancetype
+key_name = keyname
+instance_type = instancetype
+
+
+Example command : terraform apply -var-file dev.tfvars

@@ -1,0 +1,462 @@
+ANSIBLE 
+
+TO ISNTALL ANSIBLE IN UBUNTU
+
+sudo apt-get install -f   
+sudo apt-get install software-properties-common
+sudo apt-add-repository ppa:ansible/ansible
+sudo apt-get update
+sudo apt-get install ansible -y
+
+UBUNTU
+sudo apt-add-repository ppa:ansible/ansible
+sudo apt-get update
+sudo apt-get install ansible -y
+
+to add localhost as a slave under
+
+ssh-keygen 
+
+cat .ssh/id_rsa.pub >> .ssh/authorized_keys (to copy the public key in localhost)
+
+ssh localhost -p 22 (to check ssh connection with localhost)
+
+sudo vi /etc/ansible/hosts 
+(add localhost:22 in the hosts file uner webservers group)
+
+example: 
+[webservers]
+localhost:22
+(save and quit :wq)
+
+ansible -m ping webservers
+
+ansible <name/ip of machine> -m <name of module> -a <options>
+
+example: -m copy source and destination
+
+to know the module names: asnible-doc <module> 
+
+ansible <hostname> -m <modulename> -a <linux command>
+
+(example of adhoc commands in ansible with module shell):
+ansible <akshay.com> -m shell -a "date" 
+
+example of adhoc command to display files on host named newdayhost.day.com:
+ansible newdayhost.day.com -m shell -a "ls"
+
+ansible localhost -m shell -a "touch akshay.txt" (to create a file in localhost with name 
+akshay.txt with shell module)
+
+ansible localhost -m command -a "touch akshay.txt" (to create a file in localhost with name 
+akshay.txt with command module)
+ 
+ansible -m ping <hostgroupname> (to ping the particular group)
+
+
+TO COPY PUBLIC KEY INSIDE THE NODES: 
+
+ssh-keygen 
+copy the key from id_rsa.pub in master to the nodes
+
+inside the node: 
+cd .ssh
+inside the .ssh create a file authorized_keys and paste the key here and save and quit
+
+now check the connectivity from the master by
+ssh privateip/publicip
+
+ansible all –lists-hosts (lists all the hosts)
+ansible <privateip/hostgroupname> -a “ls” (list the contents of the pwd of the hosts) 
+ansible <privateip/hostgroupname> -a “touch file1” (creates a file1 in the hosts) 
+Ansible dbservers -a “sudo apt-get update” (updates the host machine)
+
+
+ADHOC COMMANDS FOR ANSIBLE: 
+
+ansible <hostgroupname> -a "<commandhere>"
+ansible -m setup webservers (setup module shows gathering all facts about the host machine)
+ansible <hostgroupname> -m shell -a 'hostname' (shows hostname of the hosts)
+ansible <hostgroupname> -m apt -a 'name=git state=present' --become (install git in host as root)
+ansible <hostgroupname> -m file -a 'dest=/root/sample.txt state=touch mode=600 owner=root group=root' --become
+(create a file in root directory and set permissions to it)
+
+PLAYBOOKS: 
+sudo vi apache2.yaml (to create a yaml file )
+(inside the file)
+---
+- hosts: webservers
+  become: true
+  tasks:
+    - name: install apache2
+      apt: name=apache2 update_cache=yes state=latest
+
+    - name: enabled mod_rewrite
+      apache2_module: name=rewrite state=present
+      notify:
+         - restart apache2
+
+  handlers:
+    - name: restart apache2
+      service: name=apache2 state=restarted
+
+ansible-playbook apache2.yaml -c (to perform dry run)
+ansible-playbook apache2.yaml (to run the playbook)
+
+ansible-playbook <playbookname> (to run the playbooks)
+
+PLAYBOOKS WITH DIFFERENT MODULES
+---
+- hosts: localhost
+  tasks: 
+   - name: date command
+     command: date
+
+--- 
+- hosts: localhost
+  tasks: 
+  - name: execute ping
+    ping:  
+
+--- 
+- hosts: localhost
+  tasks: 
+   - name: create a directory
+     file: path=foo state=touch
+
+--- 
+- hosts: localhost
+  tasks: 
+   - name: create a directory
+     file: path=foo state=directory
+
+---
+- hosts: localhost
+  tasks: 
+   - name: copy a file from source to destination
+     copy: src=/home/labsuser/foo.txt dest=/home/labsuser/foo/
+
+--- 
+- hosts: localhost
+  become: yes
+  tasks: 
+   - name: adding a user
+     user: name=akshay123 state=present
+   - name: adding user2
+     user: name=akshay456 state=present
+   - name: adding user3 
+     user: name=akshay789 state=present
+   
+   - name: deleting user akshay456
+     user: name=akshay456 state=absent
+
+--- 
+- hosts: localhost
+  tasks: 
+   - name: debug msg
+     debug: 
+       msg: Hi this is akshay 
+
+--- 
+- hosts: localhost
+  vars: 
+   salutations: hi this is akshay!
+  tasks:
+   - name: debugging the variable
+     debug: 
+       msg: "{{ salutations }}" 
+---
+- name: install nodejs
+  hosts: webservers
+  gather_facts: true
+  become: true
+  tasks:
+   - name: add apt key for nodesource
+     apt_key: url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+   - name: add repo for nodesource
+     apt_repository:
+      repo: 'deb https://deb.nodesource.com/node_0.10 {{ ansible_distribution_release }} main'
+      update_cache: no
+   - name: install nodejs
+     apt: name=nodejs
+
+---
+- hosts: localhost
+  become: yes
+  connection: ssh
+  tasks:
+  - name: create a user
+    user: name={{ item }} state=present
+    with_items:
+     - akshay
+     - akshay1
+     - akshay2
+     - akshay3
+     - akshay4
+--- 
+- hosts: localhost
+  vars: 
+   rollnumber: 10
+  tasks:
+   - name: debugging the variable
+     debug: 
+       msg: "{{ rollnumber }}" 
+
+---
+- hosts: localhost
+  tasks:
+  - name: print students name
+    debug:
+      msg: " Student name is {{ item }} "
+    loop: [ akshay, anita, nitin]
+
+---
+- hosts: localhost
+  tasks:
+  - name: print students name
+    debug:
+      msg: " Student name is {{ item }} "
+    loop:
+        - akshay
+        - anita
+        - nitin
+
+SIMPLE LOOPS:
+---
+- hosts: localhost
+  become: true
+  tasks:
+    - name: run with items greater than 5
+      debug:
+        msg: "{{ item }}"
+      loop: [ 0, 1, 1, 2, 3, 5, 8, 13 ]
+
+---
+- hosts: localhost
+  tasks: 
+  - name: display loop items
+    debug: 
+      msg: " {{ item }}"
+    loop: [ orange, apple, berries]
+---
+- hosts: localhost
+  tasks: 
+  - name: display loop items 04 
+    debug: 
+      msg: " {{ item }}"
+    loop: 
+    - orange
+    - apple
+    - berries
+
+---
+- hosts: localhost
+  become: true
+  tasks:
+    - name: with_indexed_items
+      debug:
+        msg: "{{ item.0 }} - {{ item.1 }}"
+      with_indexed_items:
+        - oneorange
+        - twomangoes
+        - threelemon
+---
+- hosts: webservers
+  become: true
+  tasks:
+    - name: loop
+      debug:
+        msg: "{{ item }}"
+      loop:
+        - one
+        - two
+    - name: with_items
+      debug:
+        msg: "{{ item }}"
+      with_items:
+        - one
+        - two
+    - name: with_indexed_items
+      debug:
+        msg: "{{ item.0 }} - {{ item.1 }}"
+      with_indexed_items:
+        - one
+        - two
+        - three
+
+INDEXED ITEMS EXAMPLE: 
+---
+- hosts: localhost
+  become: true
+  tasks:
+    - name: with_indexed_items
+      debug:
+        msg: " hi at position {{ item.0 }} is present name {{ item.1 }}"
+      with_indexed_items:
+        - akshay
+        - anita
+        - nitin
+
+item.0 - prints the key or number of the item 
+item.1 - prints the value in the item
+OUTPUT: 
+  msg: " hi at position 0 is present name akshay"
+  msg: " hi at position 1 is present name anita"
+  msg: " hi at position 2 is present name nitin"
+
+DICTIONARY EXAMPLE: 
+---
+- hosts: localhost
+  vars:
+    students:
+      student1: akshay
+      student2: anita
+      student3: nitin
+  tasks:
+  - name: display the students names
+    debug:
+      msg: " {{ item.key }} name is {{ item.value }} "
+    with_dict: " {{ students }} "
+OUTPUT: 
+ok: [localhost] => (item={'key': 'student1', 'value': 'akshay'}) => {
+    "msg": " student1 name is akshay "
+}
+ok: [localhost] => (item={'key': 'student2', 'value': 'anita'}) => {
+    "msg": " student2 name is anita "
+}
+ok: [localhost] => (item={'key': 'student3', 'value': 'nitin'}) => {
+    "msg": " student3 name is nitin "
+}
+
+WHEN CONDITION: 
+---
+- hosts: localhost
+  become: yes
+  tasks:
+  - name: creating a user
+    user: name=akshay state=present
+    when: ansible_os_family == "Debian"
+---
+- hosts: localhost
+  become: yes
+  tasks:
+  - name: creating a user
+    user: name=akshay state=present
+    when: ansible_hostname == "master"
+
+- hosts: localhost
+  tasks:
+  - name: print the required numbers
+    debug:
+      msg: "{{ item }} "
+    loop:
+        - 1
+        - 2
+        - 3
+        - 6
+        - 8
+        - 10
+    when: item >5
+
+---
+- hosts: localhost
+  become: true
+  tasks:
+    - name: run with items greater than 5
+      debug:
+        msg: "{{ item }}"
+      loop: [ 0, 1, 1, 2, 3, 5, 8, 13 ]
+      when: item > 5
+
+prints only the output of numbers more than 5
+
+HANDLERS:
+---
+- hosts: localhost
+  become: yes
+  tasks:
+  - name: create a user
+    user: name=akshay state=present
+    when: ansible_hostname == "master"
+    notify: useradd akshay1
+
+  handlers:
+  - name: useradd akshay1
+    user: name=akshay1 state=present
+(if the user task akshay is created successfully then the handler task ,i.e., creating user 
+akshay1 will run)
+
+
+---
+- hosts: localhost
+  become: yes
+  tasks:
+  - name: install apache2
+    apt: name=apache2 state=present
+    when: ansible_hostname == "master"
+    notify:
+      - start apache2
+      - restart apache2
+
+
+  handlers:
+  - name: start apache2
+    service: name=apache2 state=started
+  - name: restart apache2
+    service: name=apache2 state=restarted
+
+to override the playbok 
+ansible-playbook <playbookname> -e <variablename>=<variablevalue>
+
+TASK USING REGISTER AND HANDLER:
+---
+- name: Simple Task
+  hosts: localhost
+  vars:
+      myvariable: myvalue
+  tasks:
+    - name: Simple Task
+      shell: hostname
+      register: outcome
+      notify: trigger1
+
+  handlers:
+          - name: trigger1
+            debug:
+               msg: "{{outcome}}"
+
+
+JINJA TMEPLATES:
+
+cat listitems.j2
+<html>
+ <head>
+  <title> {{ mytitle }} </title>
+  <subtitle> {{ mysubtitle }} </subtitle>
+ </head>
+ <body>
+  <h1> The list of cards contains the following models. </h1>
+  <table>
+  {% for item in cars %}
+    <tr>
+      <td>
+        {{ item }}
+      </td>
+    </tr>
+  {% endfor %}
+  </table>
+</body>
+
+cat listitems.yaml
+---
+- hosts: localhost
+  become: yes
+  vars:
+          mytitle: Sundar's Title
+          mysubtitle: Sundar's Sub Title 
+          cars: ['Mercedes', 'Ford', 'Nissan', 'Volvo', 'BMW', 'Corvette']
+  tasks: 
+   - name: A loop example
+     template: 
+       src: listitems.j2 
+       dest: /var/www/html/index.html

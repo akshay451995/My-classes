@@ -1,0 +1,58 @@
+---
+- name: Install and start Tomcat
+  hosts: tomcatserver
+  become: yes
+  vars:
+    tomcat_version: "10.1.7"
+  tasks:
+    - name: Create Tomcat User and directory
+      shell: sudo useradd -m -d /opt/tomcat -U -s /bin/false tomcat
+
+    - name: Upgrade all apt packages
+      apt: upgrade=dist force_apt_get=yes
+
+    - name: update all packages
+      shell: sudo apt update
+
+    - name: Install Java
+      apt:
+        name: default-jdk
+        state: present
+
+    - name: Download Tomcat
+      get_url:
+        url: "https://dlcdn.apache.org/tomcat/tomcat-{{ tomcat_version.split('.')[0] }}/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        dest: "/tmp/"
+
+    - name: Extract Tomcat
+      shell: sudo tar xzvf /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz -C /opt/tomcat --strip-components=1
+
+    - name: grant tomcat ownership
+      shell: sudo chown -R tomcat:tomcat /opt/tomcat/
+
+    - name: change permissions of bin file
+      shell: sudo chmod -R u+x /opt/tomcat/bin
+
+    - name: Create Tomcat service
+      template:
+        src: tomcat.service.j2
+        dest: /etc/systemd/system/tomcat.service
+
+    - name: Reload Systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Start Tomcat service
+      service:
+        name: tomcat
+        state: started
+        enabled: yes
+
+    - name: deploy war file to the tomcat server
+      copy: src=myapp.war dest=/opt/tomcat/webapps/ owner=tomcat group=tomcat
+
+    - name: Restart Tomcat service
+      service:
+        name: tomcat
+        state: restarted
+        enabled: yes

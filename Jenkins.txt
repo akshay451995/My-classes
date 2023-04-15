@@ -1,0 +1,121 @@
+Login in the machine
+
+# Command for installing Java 11
+sudo apt-get update
+sudo apt-get install default-jdk -y
+
+# Command for installing maven
+sudo apt-get install maven -y
+
+# Script for Jenkins installation
+
+#Add Repository key to the system
+wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
+
+# Append debian package repo address to the system
+echo deb http://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list
+
+sudo apt-get update
+# Install Jenkins
+
+sudo apt-get install jenkins -y
+
+service jenkins start
+
+configure inside jenkins:
+dashboard -- global tool configuration -- add jdk and maven and give paths
+add jdk -- namejdk -- select version you want to install -- save changes
+
+LAUNCHING JENKINS ON LINUX
+
+launch ec2 instances and edit inbound rules -- allow http, https and port:8080
+run following commands
+sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+yum install java -y
+yum install jenkins -y
+systemctl start jenkins
+yum install maven -y
+copy public ip and open jenkins in web browser
+<publicip>:8080 (type this in web browser to open jenkins)  
+
+
+
+BUILDING JOBS:
+new item 
+create codecompile with freestyle project 
+source code management would be the github repo from where the code is coming 
+select git and copy the git hub repo url here
+add build steps as invoke top level maven target (maven is the testing tool for the code)
+give your default maven name and set goals for compile
+execute build now to build the job
+
+build goals:
+compile - for compiling the code 
+test - for testing the code
+pmd:pmd - fro Quality assurance of the code QA 
+to generate reports of the QA results- go to manage jenkins-manage plugins-search in 
+available plugins-warnings next generation-install
+restart jenkins (localhost:8080/restart)
+now go to the QA job-- in configure -- add post build actions and select --record compiler
+warning and static analysis results-- in tools select pmd - and save--- build the project now- after the project is 
+built a new pmd warnings option can be seen when the project is opened
+pacakge - for packaging the code
+
+pipeline in jenkins: (ORDER OF BUILDING PIPELINES IN JENKINS --compile-test-QA-package)
+to create declarative pipeline
+
+open the project you want to build a trigger for and click on configure 
+add build triggers and select build after other projects are build and select the project 
+after which you want to execute the present project
+now if you execute the first project, the next projects will be executed automatically 
+
+TO CREATE A PIPELINE VIEW: 
+manage plugins and search build pipeline and install the build pipeline without restart
+go to dashboard and where all the projects are there click on the + sign and write pipeline 
+in search and select build pipeline view 
+at last  select the initial job and write the first job name 
+click on create 
+
+colours of pipeline --green signifies the job is executed properly without errors
+red -there is an error in that particular job of the pipeline 
+yellow - when the job is being executed it changes to yellow 
+blue - when the pipeline is pending the job is blue in colour
+
+MAVEN BUILD GOALS
+
+A Build Lifecycle is Made Up of Phases
+Each of these build lifecycles is defined by a different list of build phases,
+wherein a build phase represents a stage in the lifecycle.
+
+For example, the default lifecycle comprises of the following phases 
+(for a complete list of the lifecycle phases, refer to the Lifecycle Reference):
+
+validate - validate the project is correct and all necessary information is available
+
+compile - compile the source code of the project
+
+test - test the compiled source code using a suitable unit testing framework. 
+These tests should not require the code be packaged or deployed
+
+package - take the compiled code and package it in its distributable format, such as a JAR.
+
+verify - run any checks on results of integration tests to ensure quality criteria are met
+
+install - install the package into the local repository, for use as a dependency in other 
+projects locally
+
+deploy - done in the build environment, copies the final package to the 
+remote repository for sharing with other developers and projects.
+
+These lifecycle phases (plus the other lifecycle phases not shown here) are executed 
+sequentially to complete the default lifecycle. Given the lifecycle phases above, this 
+means that when the default lifecycle is used, Maven will first validate the project, 
+then will try to compile the sources, run those against the tests, package the 
+binaries (e.g. jar), run integration tests against that package, verify the integration 
+tests, install the verified package to the local repository, then deploy the installed 
+package to a remote repository.
+
+
+

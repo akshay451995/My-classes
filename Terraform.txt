@@ -1,0 +1,71 @@
+	TERRAFORM 
+
+1) sudo yum update -y (update the machine)
+2) sudo yum install -y yum-utils shadow-utils (download utilities)
+3) sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo 
+    (download repositories)
+4) yum update -y (update the machine after downloading the repos)
+5) sudo yum -y install terraform (install terraform)
+6) mkdir akshay (make directory as terraform workspace)
+7) cd akshay (enter the directory)
+8) vi instance.tf ( create terraform file)
+#(insdie the terraform plan)
+
+provider "aws" {
+ region = "ap-south-1"
+}
+resource "aws_instance" "web" {
+  ami           = "ami-09ba48996007c8b50"
+  instance_type = "t2.micro"
+key_name = "keyname"
+}
+
+(edit security inbound rules after creating the instance)
+
+9) aws configure (enter access keys and secret keys)
+10) terraform init (initialize the terraform repository)
+11) terraform plan (plans the action)
+12) terraform apply (applies the terraform file int action)
+
+
+
+Access Key - AKIA5WX5QRKKCDYLJGFR
+Secret Key - 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
+
+
+
+CREATING S3 BUCKET USING TERRAFORM
+
+provider "aws" {
+  region     = "us-west-2"
+  access_key = "AKIASCKIJMVV6ZLF2U42"
+  secret_key = "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"
+}
+
+resource "aws_s3_bucket" "bakshatbucket12" {
+  bucket = "my-tf-test-bucket98998"
+
+  tags = {
+    Name        = "My bucket"
+    Environment = "Dev"
+  }
+}
+
+resource "aws_s3_bucket_acl" "example" {
+  bucket = aws_s3_bucket.bakshatbucket12.id
+  acl    = "private"
+}
+
+
+
+terraform init
+terraform plan
+terraform apply 
+terraform destroy
+
+
+
+
+
+
+

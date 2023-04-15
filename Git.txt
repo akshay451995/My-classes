@@ -1,0 +1,366 @@
+
+Git Commands
+
+ To set name and email address
+
+global settings in git
+
+$ git config --global user.name "your name"
+$ git config --global user.email your email
+ 
+
+$ git init (to create a git repository)
+$ git clone <url> (to clone the reposistory) (add . after command to create folder)
+$ git status (to check the status of the files) 
+- after making changes like add and delete files we check the status of the local repository
+
+Add changes to the staging area
+
+$ git add file-name (to add files)
+$ git add directory-name (to add directories)
+$ git add-A (to add all files)
+$ git add (to add all directories)
+$ git rm --cached filename (to unstage files)
+$ git commit -m "your commit message here" (to commit changes to the local repository)
+
+Pulling changes from a remote repository 
+
+$ git pull <branch name> <remote_URL> (pulls the changes from the remote repository to the local computer)
+
+Push changes to a remote repository 
+
+$ git push origin <branch name> (push the branch to your remote repository)
+$ git push --all (push all branch to your remote repository)
+$ git remote add origin <server> (to connect a local repository to a remote repository)
+
+
+Akshat Gupta Youtube channel
+git init (to initialize git repository)
+
+create files (in working area or project)
+git status (shows untracked files in working area)
+
+git add filename (to add file into staging area)
+
+git add . (to add all files in the working area to staging area)
+
+
+git commit -m"commit message" (to add file from staging area to local repo)
+after adding see git status (it shows nothing in the working area)
+
+git log --oneline (shows the log reports)(shows all the commit id's which we have done)
+git checkout commit-id (of which u require) (opens the version of that commit)
+
+git diff (show changes between commits, commit and working tree, etc)
+git log (show commit logs)
+git show (show various types of objects)
+git bisect(use binary search to find the commit that introduced a bug)
+git grep (print lines matching a pattern)
+git log --all filename (to view all the commits influencing <filename> in all branches)
+git remote remove origin (to remove remote repository after adding)
+
+Git Live class
+GIT :
+** WD: working directory
+** SA : staging area
+** LR : local repo 
+
+1) Create a folder and get inside the folder. 
+Inside the folder right click and open git bash
+
+2) git init  (start the git repo in your folder)
+
+3) git config --global user.name "akshat"  (only one time process in the laptop) 
+
+4) git config --global user.email "akshat@apicletech.com" (only one time process in the laptop)
+
+5) git config --list   (press q to come out of it) 
+
+6) touch file1 
+
+7) cat > index.html
+hello world 
+(ctrl d to exit)
+
+8) git status   (it will show the status of the file...if the file name is in red it shows the file
+                  is in working directory)
+
+9) git add .    (it will move the files from the working directory to the 
+                  staging area ...you can also use git add <<filename>> to move  a single file to staging area)
+
+10) git status   (it will show the status of the files ....if the file is in green color it shows the file
+                    is in staging area)
+
+11) git rm --cached file1  (it will unstage the file from the staging area and move back to the WD**)
+
+12) git status   (you will see file1 in red and index.html in green )
+
+13) vi index.html  (press enter)
+
+press i to insert
+
+add some extra content in the file
+
+press esc :wq
+
+14) git status   (you will see that index.html is modified)
+
+####NOW I WANT TO CHECK WHAT EXACTLY IS MODIFIED IN INDEX.HTML ###########
+
+15) git diff index.html   (this command will show what exactly the changes we have made in index.html file )
+
+16) git add .
+
+17) git status 
+
+##############Lets now move the files from the staging area to the local repo...creating a local version######
+
+18) git commit -m"first commit"   (it will save the file as a version in the local repository ...where -m denotes message)
+
+
+19) git log        (to check the local version we will use git log)
+
+
+20) git log --oneline    (to see the local version details in a single line)
+
+21) go to github ...if you have an account login ...otherwise signup 
+
+22) create a repo -> create a public repo 
+ 
+23) git remote add origin <<repo url>>
+
+24) git remote -v   (show the remote origin )
+
+25) git push -u origin master
+
+26) now the pop up will open in front of you --> token 
+
+27) go to github.com -> top right corner click on the profile (circle) --> setting --> developer setting https://github.com/settings/tokens
+
+28) create personal access token - classic ....
+
+In note put the name 
+expirating -> 30 days
+tick the repo 
+
+scroll down and generate the token
+
+copy the token which is shown in front of u 
+
+29) paste the token in the pop up which is appreared in front if u
+
+IGNORING THE FILES
+30) vi .gitignore (create file)
+31) add *.log or *.txt extension name in .gitignore file to ignore specific  files
+32) add and commit to local repo and the files would be ignored after this step
+
+33) git config --global alias.st status (to set status as st as alias)
+34) git config --global --unset alias.st (to remove st as alias for status)
+
+
+TAG (Ability to tag specific points in a repository history)
+35) git tag (to list all the tags after tags are added)
+36) git tag <tagmessage> (it will  tag the latest commit with tagmessage)
+37) git log --oneline (you will see the tagmessage on the latest commit) ()
+38) git tag <tagmessage> <commit id where you want to commit> (it will  tag specific commit id)
+39) git show <tagmessage> (to show the commit ids where the tag message is added)
+40) git tag -d <tagmessage> (to delete the tag)
+
+GIT CLONE (cloning the git hub repository and creating a copy in your local machine)
+41) create a folder and open git bash 
+git clone <repo-url>
+
+42) Forking the repo (it will create a new repo in your github account from the source github repo)
+
+43) MERGING CONFLICT: in case of merging conflicts where changes were done to the github 
+repository before your pushing the changes... first pull the changes from the remote repo
+on to your local repo resolve the issues in the folder and then commit and push changes
+in the local repo to remote repo
+
+Branching concept:
+44) git branch (list all the branches) *denotes the current branch
+45) git branch <branchname> (to create a branch)
+46) git checkout <branchname> (to get into the specific branch)
+    Go to master branch and then merge branches to master branch
+47) git merge <branchname> (merges your branch with the master branch)
+48) git log --oneline --graph (to show branching graphs)
+49) git rebase <branchname> (to create a linear graph)
+50) git branch -d <branchname> (to delete a branch)
+git push origin <tagname> (how to push tags from local repo to remote repo)
+
+PULLING THE CHANGES FROM RMEOTE REPO TO LOCAL REPO
+51) git pull (pulls the changes from remote repo to local repo)
+
+		LIVE CLASS
+
+
+################### SETTING UP THE ALIAS(other name which is easy to write) ##############
+
+lets say you have to git status regularly ,..now typing git status takes time...so what i will do will set the alias for 
+status as st ...so if i git st it will same as git status 
+
+40) git config --global alias.st status (st will be set as an alias for status)
+
+41) git st
+
+42) git status
+
+43) git config --global --unset alias.st    (unsetting the alias st so st will not be alias is status anymore)
+
+44) git st   (it will not give any output)
+
+
+##now lets say git commit -m"message" we want to set alias for commit -m as com
+
+45) git config --global alias.com 'commit -m'
+
+46) touch file10
+
+47) git add .
+
+48) git com "new commit"
+
+
+################### TAG - Ability to tag specific points in a repository's history ##########
+
+49) git tag   (list all the tags for me)  (initially it would be blank)
+
+50) git tag login   (it will tag the latest commit with tag: login)
+
+51) git log --oneline  (you will see the tag login on the latest commit) (copy one of the old commit id)
+
+52) git tag <tagname> <<commit id which you copied in step 51>>   (it will tag the speicific commit id for u)
+
+53) git log --oneline 
+
+54) git tag   (copy one of the tags)
+
+55) git show <<paste the copied tag which u copied in step 54>>  (this will show the details like commit id of that particular tag) 
+
+56) git tag -d <<tagname>>  (delete the tag)
+
+#################### GIT CLONE -> CLONING THE GITHUB AND CREATING THE COPY IN YOUR LOCAL MACHINE ###############
+
+57) Create a new folder -> books
+
+58) right click and open git back 
+
+59) git clone https://github.com/akshu20791/Books  (it will clone the git repo named books in my laptop)
+
+60) now check the folder ..you will see a new folder with books and inside it all the books present in github is present
+
+
+################## FORKING THE REPO -> IT WILL CREATE A NEW REPO IN YOUR GITHUB ACCOUNT FROM THE SOURCE GITHUB REPO ##########
+
+
+61) https://github.com/akshu20791/Books   on the top right corner you will see the option to fork the repo
+
+
+#########Resolve the conflicts ###################################
+
+62) go to your github repo ....click on any file ....edit the file and make some content changes in the file
+
+63) come to your local system...open the same file and make some changes in the file
+
+64) git status   (you will see that particular file is modified)
+
+65) git add .
+
+66) git commit -m"file was updated"
+
+67) git push -u origin master   (you will see that the conflict error is coming on that particular file)
+
+68) git pull     (it will pull the code from github and update the code in your local repo) 
+
+69) open the file in your laptop and update the final content in that file after having the meeting with the another developer 
+and finalizing the final content.
+
+70) git add .
+
+71) git commit -m"conflict resolved in the file"
+
+72) git push -u origin master 
+
+#########BRANCHING CONCEPT######
+
+73) git branch    (list all the branches)
+
+74) git branch branch1    (create a branch with name branch1)
+
+75) git checkout branch1   (you will get into the branch1)
+
+76) git branch    (here * denotes the current branch) 
+
+77) touch file100
+
+78) git add .
+
+79) git commit -m"c1"
+
+80) touch file101
+
+81) git add .
+
+82) git commit -m"c2"
+
+83) git log --oneline
+
+84) git checkout master
+
+85) git log --oneline
+
+86) touch file102 
+
+87) git add .
+
+88) git commit -m"c3"
+
+89) touch file103
+
+90) git add .
+
+91) git commit -m"c4"
+
+92) git merge branch1    (your current branch need to be master to merge with branch1)
+
+93) git log --oneline --graph    (it will show you the log via graphical format) 
+
+
+#############GIT BRANCH USING REBASE ####################
+
+94) git branch branch2
+
+95) git checkout branch2
+
+96) touch file0982
+
+97) git add .
+
+98) git commit -m"c6"
+
+99) touch file0833
+
+100) git add .
+
+101) git commit -m"c7"
+
+102) git checkout master
+
+103) touch file998393
+
+104) git add .
+
+105) git commit -m"c8"
+
+106) git rebase branch2
+
+107) git log --oneline --graph   (you will get linear graph in this case) 
+
+
+
+gittest personal acces token -- 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
+
+
+docker jenkins pipeline token -- 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
+
+

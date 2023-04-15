@@ -1,0 +1,9 @@
+CREATE A GIT HUB REPO USING TERRAFORM
+
+
+STATIC INVENTORY AND DYNAMIC INVENTORY
+
+
+create a repository in git hub using terraform
+
+terraform apply -var="key=value"

@@ -1,0 +1,178 @@
+DOCKER
+
+1) apt update -y (run this command in ubuntu machines first)
+apt install docker.io -y (to install docker)
+service docker start (start docker service)
+
+2) docker images (shows all the images in the docker)
+
+3) docker run -it --name c01 ubuntu /bin/bash (creates and enters container)
+exit (exits and stops the container)
+
+docker images 
+4) docker pull ubuntu:20.04 (to pull the image from docker registry- dockerhub.com)
+exit (exits from the process)
+docker images (shows all images present)
+docker image rm <imagename> (to delete docker images)
+
+5) docker ps -a (to list all the containers)
+
+6) docker start <containername> (to start the container before installing it)
+
+7) docker attach <containername> (to enter into the container)
+ctrl p +ctrlq (to exit the container without stopping)
+
+8) docker info (shows all the information about containers)
+
+9) docker rm <containername> (to remove a container)
+docker rm -f <containername> (to stop and remove a running container)
+
+10) to create custom images of an already existing container: 
+docker commit <containername> akshay.img (akshay.img is new custom image name)
+(create custom images to create as many replica containers as you want)
+docker image rm <imagename> (to delete created images)
+
+11) docker images (shows new image)
+docker run -it --name <newcontainername> <imagename> (to create the container replica/custom 
+image same as the previous image container)
+
+12) docker volumes:
+create a shared volume (docker volume) on the ec2 instance so that all the containers 
+can access it without creating a file in all the containers and occupying all the space
+
+if you remove/stop/delete all the container the docker volume is not deleted
+
+you cannot attach the docker volume to the existing container
+
+13) docker volume create <volumename> (to create a new docker volume)
+
+14) docker run -it --name <newcontainername> --mount source=<createdvolumename>,destination=/<newvolumename> ubuntu /bin/bash
+(to create a new container and attach the created volume with the new volume of the container )
+(any changes done in any volume would be reflected in both the volumes now)
+
+15) docker volume inspect <volumename> (shows the path of the cretaed volume)
+cd with the path of the created volume and do ls - you can see all the files created in the 
+shared storage
+
+16) docker port expose: (assigning port numbers to the apps installed in the instance )
+docker run -it --name <newcontainername> -p 8083:80 ubuntu /bin/bash (to install new container 
+and assigning port number 8083 to it for http port which is default 80)
+(/bin/bash can be neglected)
+cd /var/www/html: in index.html write the output you desire 
+open browser and <publicip>:8083 you can see the output in the website
+(edit security inbound rules and add created port numbers)
+
+docker run -it --name <newcontainername> -p <createdportnumber:portnumberofapp> --mount source=<presentec2volumename>,destination=/<newcontainervolumename> <imagename>
+(to create new container with portnumber and shared volume)
+
+for jenkins container and portforwarding 
+docker run -it --name <containername> -p 8080:8080 <jenkinsimagenamefrom-dh-registry> 
+(jenkins image name example: jenkins/jenkins) 
+(containernameexample- jenkinscontainer for remembering)
+
+
+DOCKER FILE:
+Dockerfile - contains set of instructions
+when executed it creates a custom image with the instructions given
+
+create a dockerfile in directory 
+naming of docker file - "Dockerfile" (must have capital D and no other names can be given)
+
+vi Dockerfile - (example of syntax inside the docker file)
+
+FROM ubuntu
+RUN echo "Hello World" > akshayfile
+:wq
+
+FOR BUILDING IMAGES FROM DOCKERFILE:
+docker build -t <imagename> . 
+
+creating a working directory in Dockerfile
+examples:
+FROM ubuntu
+WORKDIR /tmp 
+RUN echo "Hello World" > akshayfile
+COPY testfile/tmp
+:wq
+
+FROM httpd
+MAINTAINER akshay<akshay@gmail.com>
+#COPY THE INDEX.HTML file in the directory of apache server
+COPY index.html /usr/local/apache2/htdocs
+#EXPOSE APACHE PORT
+EXPOSE 80
+
+Press esc and then :wq
+cat >index.html
+hello world 
+(ctrl d to exit)
+docker build -t apachewebserverimg .
+docker run -d -p 8023:80 --name a1 apachewebserverimg:latest    
+curl <<private ip of your machine>>:8023
+or open browser in your machine and open localhost:8023
+
+
+
+PUSHING TO DOCKERHUB:
+docker login
+
+docker push <dokcerhubusername/imagename>
+
+(docker tag <existingimagename> <newimagename>)
+
+example: docker tag image01 akshay451995/image01
+
+ater pushing -- open the image-- open collaborators and then add client docker id
+
+#################################################
+https://www.linkedin.com/in/akshat-g-57342938/
+
+#################################################
+
+#IN AMAZON LINUX IMAGES ERROR#
+bash-4.2 error solution
+
+cp -v /etc/skel/.bash* ~/ 
+(write this command and then exit the container)
+docker start <containername>
+docker attach <containername>
+
+#IN CENTOS IMAGES#
+failed to run metadata 'appstream' error
+
+RUN cd /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN yum update -y 
+
+ERROR WHEN STARTING SERVICES IN CENTOS IMAGES (System has not been booted with systemd as 
+init system (PID 1). Can't operate.Failed to connect to bus: Host is down)
+
+sudo dnf install python2 -y
+sudo ln -s /usr/bin/python2 /usr/bin/python
+sudo mv /usr/bin/systemctl /usr/bin/systemctl.old
+curl https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py >temp
+sudo mv temp /usr/bin/systemctl
+sudo chmod +x /usr/bin/systemctl
+
+
+
+
+
+doubts
+
+1) can we add port numbers to already existing containers... --no
+if not what is the command to get the port numbers and shared storage at the time of 
+creation of containers --solved
+can we also add multiple ports while creating a new instance --solved 
+
+A docker image should have a single purpose, e.g. run your postgres database. That means 
+in your container you only want to run that single process (postgres) and nothing else. 
+So no entire OS with all it's subprocesses. That is one aspect that makes container 
+technology so powerful. You do not need to run the entire OS, just the process that you need. 
+For postgres, in particular, I recommend that you use the official image and go from there. 
+By taking a look at the Dockerfile associated with the image you will already learn quite 
+a lot about how you should work with containers ;)
+
+(how to enable auto restart of a docker container after system reboot/restart)
+A) docker update --restart=always <container id or container name>

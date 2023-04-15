@@ -1,0 +1,298 @@
+Linux:
+Giving super user rights:
+1) sudo su
+
+Creating files in linux:
+
+2) cat >file1.txt  (press enter)
+   Hello world 
+   (to exit this file1.txt you should press ctrl d) 
+
+(it will create a file with name file1 with extension txt and 
+content hello world)
+
+3) ls    (list ...you should be able to see file1.txt) 
+
+4) cat file1.txt   (to see the content of the file1.txt ) 
+
+5) to clear screen write clear or press ctrl l 
+
+6) cat >>file1.txt 
+Hello akshat 
+(press ctrl d to exit )   (this will add hello akshat below Hello world in file1.txt)
+
+7) cat file1.txt      (o/p Hello world
+                           Hello akshat)
+
+8) Lets say i have two files a.txt and b.txt . Now a.txt has content -> I am learning devops
+and b.txt has content -> Linux is first topic . Now i want to concatenate a.txt and
+b.txt and create a new file with name all which will have content of both a.txt and b.txt
+
+cat > a.txt
+I am learning Devops 
+(press ctrl d to exit) 
+
+cat > b.txt
+Linux is first topic
+(press ctrl d to exit) 
+
+cat a.txt b.txt > all.txt   (here a.txt and b.txt would be concatenated to become all.txt )
+
+ls 
+
+cat all.txt  (you will see o/p : I am learning devops
+				 Linux is first topic )
+
+9) Touch command: -> Created the empty file 
+	          -> Create multiple files at a time (with a single command) 
+ 		  -> Change the timestamp (you can see time when the file created, modify time,change time) 
+            
+
+10) touch abc.txt   (it will create a file abc.txt without any content (empty file) )
+
+11) ls    (you will see abc.txt)
+
+12) cat abc.txt  (you will see no content because this file is empty) 
+
+13) touch file3 file4.txt file5 file6 file7 file8   (it will create multiple blank files)
+
+14) stat file3   (it will show the timestamp )
+
+15)  Lets say i have created a file with name akshat.txt ...i added content that akshat is teaching 
+devops certification . later you want to delete the content of the file ...(empty the file) 
+
+cat > akshat.txt
+akshat is teaching devops certification 
+(press ctrl d to exit)
+
+now i want to empty the file :
+
+cat akshat.txt   (you will see content: akshat is teaching devops certification )
+
+>akshat.txt       (this command will delete everything in akshat.txt)
+
+cat akshat.txt  (you will see akshat.txt content is deleted ) 
+
+
+16) Vi editor : text editor   (for example it will create a file for you and open that file so that you can put the content into the file)
+
+vi devops.txt
+
+(the devops.txt file editor will open in front of you )
+
+To start inserting in the file devops.txt press i   (which is insert) 
+hello simplilearn,
+hope you are doing great .
+i am also good. I am leanring devops today
+
+now to save the file :   
+(press esc and then) 
+:w -> save the file but not quit
+:q ->  quit the file but not save 
+:wq or :x-> save the file and quit
+
+(to come out of file press esc :wq) 
+
+cat devops.txt 
+
+
+17) Creating a directory  (it is a folder in which we can create the files) 
+
+mkdir akshat  
+
+(create a directory (folder) with name akshat ) 
+
+cd akshat 
+
+(change directory to akshat ..you will get inside akshat directory) 
+
+pwd     (to see your current working directory use pwd command)  (o/p : /home/ec2-user/akshat)
+
+mkdir a1 a2 a3   (it will create multiple directories for you)
+
+ls   (you will see a1 a2 and a3) 
+
+cd ..     (between cd and .. there should be space )( go back one step ) 
+
+pwd   (o/p: /home/ec2-user) 
+
+###########GOING BACK 2 steps in a directory###
+
+cd akshat 
+cd a1
+pwd
+cd ../..  (you will go back 2 steps)
+pwd        
+
+18) copy the file 
+
+cat > c1.txt 
+first file
+(press ctrl d to exit)
+
+cp c1.txt c2.txt     (c1.txt is the source file and c2.txt woud be the destination file)
+
+(copy the content of c1.txt to c2.txt and also create c2.txt ...)
+
+cat c2.txt   (o/p : first file)
+
+cat c1.txt (o/p : first file)  
+
+
+19) Lab: Move the file into directory
+
+touch newfile
+
+ls
+
+mkdir newdirectory
+
+Now i want to move this newfile inside the newdirectory which i created
+
+mv newfile newdirectory    (move the newfile which you created above in the newdirectory which you created above)
+
+ls  (you will see that newfile is missing)
+
+cd newdirectory   (change directory to newdirectory)
+
+ls   (you will the newfile is present in the directory which we have created) 
+
+cd ..
+
+
+
+20) lab: i want to rename a file and give a new name to that file
+
+
+touch hellofile.txt
+
+now i want to rename this file to simpli.txt
+
+mv hellofile.txt simpli.txt 
+
+ls 
+
+(you will see that hellofile.txt name is replaced with simpli.txt name) 
+
+
+
+21) Hidden files in linux
+
+ls
+touch .akshatfile    (whenever you put . in front of any file it would be created as a hidden file)
+
+ls    (you will not see that file ) 
+
+ls -a   (list all the files inc hidden files)
+
+22)  Lets see how we can remove the files and directory in linux  
+
+
+``````````rmdir  -> this command is used to remove a specidc directory but it should a empty directory without any files in it `````````````
+
+Lab: 
+
+mkdir hellodirectory
+ls
+
+rmdir hellodirectory
+
+ls    (the directory woudl be removed)
+######
+
+mkdir hellodirectory    (created the hellodirectory)
+
+cd hellodirectory   (get inside the hellodirectory)
+
+touch file1   (create the file1 in hellodirectory)
+
+cd ..   (come out of hellodirectory) 
+
+rmdir hellodirectory  (since this directoty is not empty you will get an error) (o/p: rmdir: failed to remove ‘hellodirectory’: Directory not empty) 
+
+``````````````` rm -rf  -> Remove both the parent and child directory ...it will also remove delete files ....f -> forefully````````
+
+
+mkdir -p akshatgupta/simpli   (create a directory named akshatgupta and inside that directory another directory(child) is created with name simpli_ 
+
+
+rm -rf akshatgupta   -> delete the directory as well as sub directory) 
+
+cat > learndevops.txt
+learning devops
+
+(press ctrl d to quit)
+
+rm -rf learndevops.txt 
+
+ls   (the file would be removed)
+
+rm -rf hellodirectory   (the directory we created above)
+
+ls 
+
+###### ADD ON COMMANDS #################
+
+
+23) to check the Operating system you are using in your server
+
+cat /etc/os-release
+
+o/p: NAME="Amazon Linux"
+VERSION="2"
+ID="amzn"
+ID_LIKE="centos rhel fedora"
+VERSION_ID="2"
+PRETTY_NAME="Amazon Linux 2"
+ANSI_COLOR="0;33"
+CPE_NAME="cpe:2.3:o:amazon:amazon_linux:2"
+HOME_URL="https://amazonlinux.com/"
+
+
+24) Install a package /software in linux  (you need to be a sudo user to install these packages) 
+
+lets say for example we want to install apache server (httpd )
+
+yum install httpd 
+
+lets say we want to install dockers 
+
+yum install docker 
+
+yum: yellow dog updater . YUM is the primary package management tool for 
+installing, updating, removing, and managing software packages in Red Hat Enterprise Linux. 
+
+
+yum install git 
+
+
+
+Lab:
+
+yum install httpd   (it will install the httpd package )
+
+which httpd   (location of httpd)
+
+yum install docker -y (here -y will ensure that everysetting is kept as default it will not ask you is it ok while installing the software) 
+
+
+yum remove httpd -y   (it will delete the software httpd from your linux machine)
+
+which httpd   (no httpd found)
+
+yum remove docker -y (it will delete the software docker from your linux machine)
+
+yum install docker -y
+
+yum install httpd -y
+
+
+yum update docker -y   (this will update the docker software in your linux machine) 
+
+
+yum update -y (this will update my complete linux machine) (ALL THE SOFTWARES IN YOUR LINUX MACHINE WOULD BE UPDATED ) 
+
+yum list installed  (to see all the packages ) 
+
+
+tree (to display all the directory structures)

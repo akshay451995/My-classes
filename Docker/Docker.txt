@@ -1,0 +1,96 @@
+	DOCKER 
+	
+INTRODUCTION
+
+DAY1 - VIRTUAL MACHINE
+
+Compute, Network, Storage - three things common in all the VM's
+data center - availability zones
+
+Virtual machines
+
+hypervisor - to divide the ram and cpus
+
+tool - VMware
+
+processes divide the ram and cpu automatically inside the container (processes use the amount of CPU
+ and RAM required for them to run)
+
+The containers are formed on the operating system and not hardware 
+
+Container - A box is created and the processes are formed in the box on the OS
+
+All the processes are independent 
+
+Name spaces - 
+
+C- groups - control groups how much is required for the process 
+
+VM is apartment ---- Container is like PG - different bedrooms for different people (processes)
+
+TV, wifi bathroom shared (RAM, cpu, etc)
+
+Container runtime engine / Container runtime interface - which is Docker - creates the containers
+
+Alterante for Docker - Podman, ContainerD,etc
+
+Cloud - ECR, GCR, ACR (container registry)
+
+LABS:
+
+sudo usermod -a -G docker $USER (to add the present user in docker group) (stop adn start the machine 
+to see changes)
+
+sudo docker version (shows the version of docker)
+
+sudo docker (shows all the things we can do with docker) 
+
+sudo docker images (shows/lists all the images)
+
+sudo docker image ls (lists all the docker images)
+
+(in docker hub registry click on tags and u will see all the versions of the images)
+
+(java - open jdk in docker hub registry)
+
+docker pull <imagename> ()
+
+docker run ubuntu ls (creates a new container listing the files)
+
+docker run ubuntu date (creates a new container executing the date command)
+
+docker ps -aq (displays only the container ids)
+
+docker rm <containerid or name > (to remove the containers)
+
+docker rm $docker ps -aq (to remove all the containers at once)
+
+docker rmi <imagename> (for deleting the image)
+
+docker run nginx (creates a new container but is in a stopped state)
+docker run -dt nginx (creates a new container and runs it in detached mode)
+
+docker run -dt --name <containername> <imagename>(gives name to the container)
+
+docker run -dt --name akshay -p 80:80 nginx (port forwarding)
+curl http://localhost:80 (to check the portforwarding)
+
+docker run -dt --name akshay2 -p 81:80 nginx 
+
+sudo docker logs (to see all the docker logs)
+
+docker exec -it akshay /bin/sh (to enter the container and type commands)
+
+
+
+
+
+
+
+
+TASKS: 
+
+know git tags
+
+
+

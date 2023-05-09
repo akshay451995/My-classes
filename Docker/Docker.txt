@@ -36,18 +36,21 @@ Alterante for Docker - Podman, ContainerD,etc
 
 Cloud - ECR, GCR, ACR (container registry)
 
+
+
+
 LABS:
 
 sudo usermod -a -G docker $USER (to add the present user in docker group) (stop adn start the machine 
 to see changes)
 
-sudo docker version (shows the version of docker)
+docker version (shows the version of docker)
 
-sudo docker (shows all the things we can do with docker) 
+docker (shows all the things we can do with docker) 
 
 sudo docker images (shows/lists all the images)
 
-sudo docker image ls (lists all the docker images)
+docker image ls (lists all the docker images)
 
 (in docker hub registry click on tags and u will see all the versions of the images)
 
@@ -66,6 +69,7 @@ docker rm <containerid or name > (to remove the containers)
 docker rm $docker ps -aq (to remove all the containers at once)
 
 docker rmi <imagename> (for deleting the image)
+docker image rm <imagename> (for deleting the image)
 
 docker run nginx (creates a new container but is in a stopped state)
 docker run -dt nginx (creates a new container and runs it in detached mode)
@@ -81,16 +85,133 @@ sudo docker logs (to see all the docker logs)
 
 docker exec -it akshay /bin/sh (to enter the container and type commands)
 
+docker pull node:6.0
+
+sudo netstat -nltp
+
+CI:
+
+create a docker direcotry and app01 directory - inside it create a app.js (a nodejs file)
+
+vi app.js
+
+const http = require(&#39;http&#39;);
+const hostname = &#39;0.0.0.0&#39;;
+const port = 80;
+const server = http.createServer((req, res) =&gt; {
+    res.statusCode = 200;
+      res.setHeader(&#39;Content-Type&#39;, &#39;text/plain&#39;);
+        res.end(&#39;Hello Docker Chief\n&#39;);
+});
+server.listen(port, hostname, () =&gt; {
+    console.log(&#39;Server running at http://%s:%s/&#39;, hostname, port);
+});
+process.on(&#39;SIGINT&#39;, function() {
+    console.log(&#39;Caught interrupt signal and will exit&#39;);
+    process.exit();
+});
+
+save and quit
+
+vi Dockerfile
+
+# Use an official Node runtime as the parent image
+FROM node:6
+# Set the working directory in the container to /app
+WORKDIR /app
+# Copy the current directory contents into the container at /app
+ADD . /app
+# Make the container&#39;s port 80 available to the outside world
+EXPOSE 80
+# Run app.js using node when the container launches
+CMD [&quot;node&quot;, &quot;app.js&quot;]
+
+docker build -t <imagename> . (build docker image from Dockerfile)
+
+docker build -t <imagename> -f <dockerfilenewname> .(if a new name is given to dockerfile)
+
+docker run --name node-app1 -dt -p 85:80 node-app:0.1 (to create a container name node-app1)
+
+docker tag <imagename> <dockerhubusername/repositoryname:tagname>
+
+docker login
+
+docker push <dockerhubusername/repositoryname:tagname>
+
+docker commit <containername> <newimagename:tagname> 
+
+NETWRORKING:
+
+ip a (shows the ip address)
+
+docker run -dt --name conta donch/net-tools (to create a container name- conta and image- donch/net-tools)
+docker exec -it conta /bin/sh
+ip a (shows the ip of container)
+exit
+
+docker run -dt --name contb donch/net-tools (to create a container name- contb and image- donch/net-tools)
+docker exec -it contb /bin/sh
+ip a (shows the ip of container)
+exit
+
+docker inspect conta
+
+docker network (shows all the modules which can be used using docker network)
+
+docker network ls (lists all the networks available in the docker VM)
+
+docker network create my_bridge (creates a new network with the name my_bridge)
+
+docker run --help (shows the modules to use for docker run command to add network)
+
+docker run -dt --name db --network my_bridge donch/net-tools (to add network and create cont)
+
+now ping from the new container to the existing container ip and it will not connect as
+it is in a different network 
+
+ping 172.17.0.2 (will not connect)
+
+docker network connect <networkname> <containername> (to connect the container to another 
+network)
+
+docker network disconnect <networkname> <containername> (to disconnect the container to another
+network)
+
+docker network create --subnet <yousubnetrange> --gateway <subnetgateway> <newnetworkname>
+(to create a new network with your own subnet range and gateway)
+
+docker network create --subnet 172.25.0.0/24 --gateway 172.25.0.1 <networkname> 
+
+STORAGE:
+
+docker volume (shows all the modules which can be used with docker volume)
+
+docker volume create my_vol (create a new volume with name my_vol)
+
+docker volume ls  (lists all the docker volumes)
+
+docker run -dt --name vol1 -v my_vol:/var/www/html alpine
+
+DOCKER COMPOSE: 
 
 
 
+NOTES: 
+RUN in docker file runs linux command on the local machine and cmd runs on the container
 
-
+troubleshooting dockerfile:
+perform all the tasks manually inside a container and then create the image using that container
 
 
 TASKS: 
 
 know git tags
 
+Networking - AWS VPC, CIDR, DNS
 
+know elastic block storage 
+
+object storage and block storage
+
+3 tier architecture
 

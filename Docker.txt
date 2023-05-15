@@ -116,7 +116,7 @@ or open browser in your machine and open localhost:8023
 PUSHING TO DOCKERHUB:
 docker login
 
-docker push <dokcerhubusername/imagename>
+docker push <dockerhubusername/imagename>
 
 (docker tag <existingimagename> <newimagename>)
 

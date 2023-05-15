@@ -38,7 +38,6 @@ Cloud - ECR, GCR, ACR (container registry)
 
 
 
-
 LABS:
 
 sudo usermod -a -G docker $USER (to add the present user in docker group) (stop adn start the machine 
@@ -140,7 +139,7 @@ docker push <dockerhubusername/repositoryname:tagname>
 
 docker commit <containername> <newimagename:tagname> 
 
-NETWRORKING:
+NETWORKING:
 
 ip a (shows the ip address)
 
@@ -154,33 +153,42 @@ docker exec -it contb /bin/sh
 ip a (shows the ip of container)
 exit
 
-docker inspect conta
+docker inspect <containername> (shows all the network details of the containers)
+
+ex: docker inspect conta (shows all the network details of the container named conta)
 
 docker network (shows all the modules which can be used using docker network)
 
 docker network ls (lists all the networks available in the docker VM)
 
-docker network create my_bridge (creates a new network with the name my_bridge)
+docker network create <newnetworkname> 
+
+ex: docker network create my_bridge (creates a new network with the name my_bridge)
+
+docker network inspect <networkname> (to see all the containers attached to the network)
 
 docker run --help (shows the modules to use for docker run command to add network)
 
-docker run -dt --name db --network my_bridge donch/net-tools (to add network and create cont)
+docker run -dt --name <containername> --network <networkname> <imagename> 
+(to create a new container with the existing network)
+
+ex: docker run -dt --name db --network my_bridge donch/net-tools (to add network and create cont)
 
 now ping from the new container to the existing container ip and it will not connect as
 it is in a different network 
 
 ping 172.17.0.2 (will not connect)
 
-docker network connect <networkname> <containername> (to connect the container to another 
+docker network connect <networkname> <containername> (to connect an existing container to another 
 network)
 
-docker network disconnect <networkname> <containername> (to disconnect the container to another
+docker network disconnect <networkname> <containername> (to disconnect the container from another
 network)
 
 docker network create --subnet <yousubnetrange> --gateway <subnetgateway> <newnetworkname>
 (to create a new network with your own subnet range and gateway)
 
-docker network create --subnet 172.25.0.0/24 --gateway 172.25.0.1 <networkname> 
+ex: docker network create --subnet 172.25.0.0/24 --gateway 172.25.0.1 <networkname> 
 
 STORAGE:
 
@@ -190,17 +198,275 @@ docker volume create my_vol (create a new volume with name my_vol)
 
 docker volume ls  (lists all the docker volumes)
 
+docker run -dt --name <containername> <volumename>:<file-path-of-the-volume-in-container> <imagename>
 docker run -dt --name vol1 -v my_vol:/var/www/html alpine
 
 DOCKER COMPOSE: 
 
+3 tire architecture:
+User --> Web --> App --> Db
+Deployment - Db --> App --> Web
+
+master branch
+	feature branch - where Developer will do end to end testing
+
+Use cases for docker compose: 
+1) For Developer end to end testing 
+2) for jenkins integration testing
+
+docker-compose (to list all the modules with docker-compose)
+
+to install docker compose: 
+sudo curl -L https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+
+permission denied solution:
+sudo chmod +x /usr/local/bin/docker-compose (to change the permissions of the docker-compose file)
+
+now:
+docker-compose (lists all the modules of the docker-compose)
+
+inside a directory create a docker-compose.yml file and Dockerfile
+
+docker-compose build (builds the docker-compose and Dockerfile)
+docker-compose up (runs the containers in the foreground mode)
+docker-compose up -d (runs the containers in detached mode)
+docker-compose ps (it shows the containers running)
+docker-compose logs <servicename> (servicename is web or app or db)
+
+to use only docker-compose file  without Dockerfile u have to specify the image name inside 
+the docker-compose file 
+
+docker-compose up -d (it starts the contaienrs)
+docker-compose ps (it shows the containers running)
+docker-compose logs (shows all the logs of bulding the container)
+(for troubleshooting purpose)
+docker-compose up --help (shows all the commands list with up)
+docker-compose up -d --build (builds the Dockerfile and then runs the containers)
+
+docker-compose down (stops all the containers running)
+docker-compose down --help (shows all the commands list with down)
+docker -compose down --rmi all (stops all the containers and removes all the images)
+
+docker-compose stop (stops the container)
+docker-compose stop <containername> (stops specific containers)
+docker-compose ps (lists the running containers)
+docker-compose start (starts all the containers)
+docker-compose restart (restarts all the containers)
+
+docker compose exec (to get inside the container) 
+
+ORCHESTRATION:
+
+docker swarm init (initiates the VM as Docker swarm manager)
+IF ERROR: permission denied then try sudo usermod -aG docker $USER and then reboot
+
+docker swarm join (modules)
+
+docker node ls (lists all the worker nodes)
+
+docker service create --name <servicename> --replicas <no.of.replicas> <imagename>
+docker service create --name myweb --replicas 3 nginx
+
+docker service ls (lists the services)
+
+docker service ps <servicename> (shows all the containers that are created by the specific 
+service)
+
+docker service create --name flud --mode global nginx (since it is global it creates as many containers
+as the number of nodes)
+docker node ls (shows all the nodes)
+docker service ps <servicename> (shows all the service containers running on the nodes)
+
+docker service create --name <nameoftheservice> --replicas 1 nginx (u have to specify the numbers 
+in replicated mode)
+
+docker service scale <servicename>=<number-of-containers-u-want-in-total> (to create new containers 
+from existing servicename or reduce the number of containers running on the existing service)
+
+docker service update --replicas=<number-of-containers-u-want-in-total> <servicename> 
+(to create new containers from existing servicename or reduce the number of containers running on the 
+existing service)
+
+Note: services created by using global mode cannot be scaled or replicated
+
+docker service update --help (shows all the things we can do with the update command)
+
+TO LABEL THE CONTAINERS: 
+docker service update --label-add name=
+(changes the servicename)
+
+docker node update --label-add name=worker1 <iip-or-hostname-of-the-machine> 
+(changes the name of the node)
+
+docker node ls --filter node.label=node=<name-given-to-the-node>
+
+
+NODE MANAGEMENT :
+
+docker node ls (lists all the nodes)
+
+draining a node : 
+
+docker node inspect <hostname> (lists all the containers running on the node)
+
+docker service ls 
+
+docker ps | wc -l (shows the )
+(wc is wordcount)
+
+docker node update --help
+
+docker node update --availability <"active" or "pause" or "drain">
+
+Note: Drain: 1) when drain is applied the containers shift to the other nodes
+	2) new containers are not created on the node which is in drain state
+Pause: 
+1) The existing containers on the node will be there but no new containers will be created on 
+the node
+
+Note: If you want to do any activity which will not affect any containers but it might affect the capacity 
+or the load on the node then we will use pause option
+
+Active: to restart the node availability again
+
+docker node update --availability drain <hostname> (to drain a specific node)
+
+docker service ps <servicename> (shows the containers shutdown on the drained node and now 
+containers are created and running on different nodes )
+Note: service created in global mode cannot move to another node 
+
+rollback : (active mode)
+
+docker node update --availability active <hostname> (rollback the node to active state)
+
+For global mode: 
+Note: for containers created in global mode the services are started again after getting active 
+
+For replicated mode: the containers which are moved in the drain mode to another node will not come 4
+back to the same node... but they remain on the node to which they moved
+
+Pause: 
+
+docker node update --availability pause <hostname> (no new containers will be created on the paused node)
+
+Note: existing containers remain on the paused node and remain in running state
+
+ASSIGNING PORTS : 
+
+docker service create --name my_web --replicas 3 --publish published=5050,target=80 nginx 
+( when we connect to 5050 any one of the 3 containers is going to give response) 
+
+curl http://localhost:5050 
+
+TROUBLESHOOTING : 
+
+docker service logs <servicename> (shows all the logs of the service)
+
+ex: docker service logs my_web
+
+docker inspect <containerid> (to find the ip address of container)
+(it shows in a big Json format)
+
+SOLUTION for automation: 
+sudo apt  install jq -y (installs jq)
+docker isnspect <containerid> | jq '.'(prints the whole output)
+docker isnspect <containerid> | jq '.[].State.Status' (shows only the status log of the contaner)
+docker isnspect <containerid> | jq '.[].NetworkSettings.Networks.Bridge.IPAddress' (shows only the ip 
+address) 
+
+Note : to decode the Json we use jq simillar to using grep. this is not a docker command but a basic 
+linux command... jq can be used wherever there is a json output... it can be used in ansible and jenkins 
+also 
+
+DOCKER SWARM NETWORK : 
+
+First create an overlay network on the master node for the swarm and then attach the containers to 
+the network 
+
+docker network create -d overlay <networkname>  (to create a new network for docker swarm)
+
+docker service create --name <servicename> --replicas <5> --network <networkname> <imagename> 
+(assigning network to the swarm)
+
+docker network inspect <networkname> 
+
+docker service create --name <servicename> --replicas <5> --publish target=<80>,published=<5051>--network <networkname> <imagename> 
+(to assign the network to the service with publishing)
+curl http://localhost:5051
+
+DOCKER SWARM VOLUME : 
+
+docker volume create <volumename> (to create a volume)
+
+docker service create -d --replicas <4> --name <servicename> --mount source=<volumenamecreated>,target=/app <imagename>
+(to create a service and containers with the volume attached)
+
+ex: docker service create -d --replicas 4 --name myservice --mount source=volume1,target=/app nginx
+
+docker volume ls (lists the volume created) (it shows local driver)
+
+Note: the volume is only created on the master node hence the volume changes done to the containers 
+in the master node cannot be seen in the other nodes
+
+RESET OR CLEANUP FOR DOCKER SWARM : 
+
+docker swarm leave (do this on the worker nodes adn then the master nodes)
+
+in the master node: docker node ls (shows the worker nodes as down)
+
+in the master node: 
+docker swarm leave -f (for the master to leave the swarm) 
+(all the containers along with the network will all get removed)
+
+
+
 
 
 NOTES: 
-RUN in docker file runs linux command on the local machine and cmd runs on the container
+RUN in Dockerfile runs linux command on the local machine and cmd runs on the container
 
-troubleshooting dockerfile:
+troubleshooting Dockerfile:
 perform all the tasks manually inside a container and then create the image using that container
+
+Container - Name, port-forwarding, volume, network, mode -d or -i
+
+to get inside a mysql container: 
+docker exec -it <containername> mysql -uroot-prootroot (-u  is username -p is password)
+ex: docker exec -it app01_db_1 mysql -uroot -prootroot
+
+ORCHESTRATION: 
+managing the number of containers by adding or deleting from the master is called as 
+orchestration. identical containers are created based on the traffic. when the curl command 
+is used the request goes onto one container and the port is executed on that container.
+To accomodate the traffic additional containers are created to balance the load. 
+Ex: if a container can handle 5 requests per second then the 6th request is forwarded to 
+the next container 
+
+Load balancer - It will recieve the traffic and direct the traffic to different containers 
+
+fluentd - is a tool which has to be installed which will be runnning along the cotainers. 
+it gathers all the logs from all the contaienrs and identifies exactly where the error has occured 
+
+
+Replicated - u have to give the number of replicas you want to create 
+global - u dont have to provide the number of containers... the number of containers created 
+are the same as the number of nodes
+
+
+U cannot upgrade the version with the containers running. u have to do it with the node management.
+In case if we eant ot evacuate the containers from a node :
+
+Drain : U can drain the master node
+If master node is taken to drain then the other node is going to be the master
+
+NOTE: In PORTFORWARDING 85:80 (85 is the host port or node port and the number after : is the 
+container port)
+
+We need to keep the Vm running but in case of containers we can copy the image, scale up and down
+which is easy in realtime
+
+ingress - incoming trafiic 
+egress - outgoing trafiic
 
 
 TASKS: 
@@ -214,4 +480,37 @@ know elastic block storage
 object storage and block storage
 
 3 tier architecture
+ 
+try to delete an image and network from a running container
+
+Interview Questions: 
+
+difference between run and cmd; add and copy, etc
+
+EFK
+
+KNOW DATA STRUCTURES -- MOST  IMPORTANT
+
+attach 2 containers with the same volume and then check the changes through both the containers for the shared volume
+also test for the same shared volume on the other nodes in which the same volume is attached
+docker exec -it <containerid> /bin/sh (to enter into the container)
+
+try draining the master node
+
+
+CERTICATION NECESSARY 
+
+--> CKA - CERTIFIED KUBERNETES ADMINISTRATOR not CKAD
+
+
+--> Read the Job Description of the company :
+If company talks about the company such as microservices and Kubernetes then it is a good company 
+to join 
+
+--> if it only talks about using the cloud services or managing the cloud then avoid that company
+
+--> if you are in an interview talk more about docker and kubernetes 
+say that you have worked on a project on the kubernetes which will be given at the course end
+
+ 
 

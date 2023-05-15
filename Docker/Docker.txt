@@ -198,7 +198,7 @@ docker volume create my_vol (create a new volume with name my_vol)
 
 docker volume ls  (lists all the docker volumes)
 
-docker run -dt --name <containername> <volumename>:<file-path-of-the-volume-in-container> <imagename>
+docker run -dt --name <containername> -v <volumename>:<file-path-of-the-volume-in-container> <imagename>
 docker run -dt --name vol1 -v my_vol:/var/www/html alpine
 
 DOCKER COMPOSE: 
@@ -291,12 +291,12 @@ Note: services created by using global mode cannot be scaled or replicated
 
 docker service update --help (shows all the things we can do with the update command)
 
-TO LABEL THE CONTAINERS: 
-docker service update --label-add name=
-(changes the servicename)
+TO LABEL THE SERVICES: 
+docker service update --label-add name=<newservicename> <servicename>
+(changes the servicename) (cannot change the service name)
 
-docker node update --label-add name=worker1 <iip-or-hostname-of-the-machine> 
-(changes the name of the node)
+docker node update --label-add name=worker1 <ip-or-hostname-of-the-machine> 
+ (changes the name of the node)
 
 docker node ls --filter node.label=node=<name-given-to-the-node>
 
@@ -311,7 +311,7 @@ docker node inspect <hostname> (lists all the containers running on the node)
 
 docker service ls 
 
-docker ps | wc -l (shows the )
+docker ps | wc -l (shows the count of the running containers+1) 
 (wc is wordcount)
 
 docker node update --help
@@ -324,8 +324,8 @@ Pause:
 1) The existing containers on the node will be there but no new containers will be created on 
 the node
 
-Note: If you want to do any activity which will not affect any containers but it might affect the capacity 
-or the load on the node then we will use pause option
+Note: If you want to do any activity which will not affect any containers but it might affect the 
+capacity or the load on the node then we will use pause option
 
 Active: to restart the node availability again
 
@@ -335,7 +335,16 @@ docker service ps <servicename> (shows the containers shutdown on the drained no
 containers are created and running on different nodes )
 Note: service created in global mode cannot move to another node 
 
-rollback : (active mode)
+ROLLBACK : 
+
+docker service rollback <servicename> (goes back to the previous scaling number or update)
+
+Note - rollback causes the service to go back to the previous stage before this... if suppose there 
+where 3 containers in the service previously and then we scaled them upto 5 then the rollback 
+command will get the containers back to the previous state that is 3 containers again... if there were
+5 containers and we scaled them to 3 then the rollback would get them to 5 containers again
+
+active mode:
 
 docker node update --availability active <hostname> (rollback the node to active state)
 
@@ -353,8 +362,11 @@ Note: existing containers remain on the paused node and remain in running state
 
 ASSIGNING PORTS : 
 
-docker service create --name my_web --replicas 3 --publish published=5050,target=80 nginx 
+docker service create --name <my_web> --replicas 3 --publish published=5050,target=80 nginx 
 ( when we connect to 5050 any one of the 3 containers is going to give response) 
+				(or)
+docker service create --name <servicename> -p <5050:80> --replicas <no.of-replicas-u-want> <imagename>
+
 
 curl http://localhost:5050 
 
@@ -369,9 +381,9 @@ docker inspect <containerid> (to find the ip address of container)
 
 SOLUTION for automation: 
 sudo apt  install jq -y (installs jq)
-docker isnspect <containerid> | jq '.'(prints the whole output)
-docker isnspect <containerid> | jq '.[].State.Status' (shows only the status log of the contaner)
-docker isnspect <containerid> | jq '.[].NetworkSettings.Networks.Bridge.IPAddress' (shows only the ip 
+docker inspect <containerid> | jq '.'(prints the whole output)
+docker inspect <containerid> | jq '.[].State.Status' (shows only the status log of the contaner)
+docker inspect <containerid> | jq '.[].NetworkSettings.Networks.Bridge.IPAddress' (shows only the ip 
 address) 
 
 Note : to decode the Json we use jq simillar to using grep. this is not a docker command but a basic 
@@ -391,7 +403,7 @@ docker service create --name <servicename> --replicas <5> --network <networkname
 docker network inspect <networkname> 
 
 docker service create --name <servicename> --replicas <5> --publish target=<80>,published=<5051>--network <networkname> <imagename> 
-(to assign the network to the service with publishing)
+(to assign the network to the service with port publishing)
 curl http://localhost:5051
 
 DOCKER SWARM VOLUME : 
@@ -410,7 +422,7 @@ in the master node cannot be seen in the other nodes
 
 RESET OR CLEANUP FOR DOCKER SWARM : 
 
-docker swarm leave (do this on the worker nodes adn then the master nodes)
+docker swarm leave (do this on the worker nodes and then the master nodes)
 
 in the master node: docker node ls (shows the worker nodes as down)
 
@@ -454,10 +466,11 @@ are the same as the number of nodes
 
 
 U cannot upgrade the version with the containers running. u have to do it with the node management.
-In case if we eant ot evacuate the containers from a node :
-
+In case if we want to evacuate the containers from a node :
 Drain : U can drain the master node
-If master node is taken to drain then the other node is going to be the master
+{If master node is drained then the other node is going to be the master - FALSE - the master 
+node is always the master... in the drain mode on master only the containers will move to the worker
+nodes and no new containers will be formed on the master node}
 
 NOTE: In PORTFORWARDING 85:80 (85 is the host port or node port and the number after : is the 
 container port)
@@ -491,8 +504,10 @@ EFK
 
 KNOW DATA STRUCTURES -- MOST  IMPORTANT
 
-attach 2 containers with the same volume and then check the changes through both the containers for the shared volume
-also test for the same shared volume on the other nodes in which the same volume is attached
+attach 2 containers with the same volume and then check the changes through both the containers for 
+the shared volume also test for the same shared volume on the other nodes in which the same volume is 
+attached
+
 docker exec -it <containerid> /bin/sh (to enter into the container)
 
 try draining the master node

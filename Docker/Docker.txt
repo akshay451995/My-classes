@@ -36,6 +36,11 @@ Alterante for Docker - Podman, ContainerD,etc
 
 Cloud - ECR, GCR, ACR (container registry)
 
+CRE - container runtime engine (docker, podman, kubernetes)
+CRI - Container runtime interface 
+CRE AND CRI are both same
+
+
 
 
 LABS:
@@ -434,6 +439,7 @@ docker swarm leave -f (for the master to leave the swarm)
 
 
 
+
 NOTES: 
 RUN in Dockerfile runs linux command on the local machine and cmd runs on the container
 
@@ -445,6 +451,8 @@ Container - Name, port-forwarding, volume, network, mode -d or -i
 to get inside a mysql container: 
 docker exec -it <containername> mysql -uroot-prootroot (-u  is username -p is password)
 ex: docker exec -it app01_db_1 mysql -uroot -prootroot
+
+Entrypoint - means when u get into a container that specific command is going to be executed
 
 ORCHESTRATION: 
 managing the number of containers by adding or deleting from the master is called as 
@@ -481,6 +489,11 @@ which is easy in realtime
 ingress - incoming trafiic 
 egress - outgoing trafiic
 
+MOST OF THE DOCKER COMMANDS :
+
+docker <module> <action> <options>  
+
+
 
 TASKS: 
 
@@ -499,6 +512,7 @@ try to delete an image and network from a running container
 Interview Questions: 
 
 difference between run and cmd; add and copy, etc
+Add is a superpower of copy 
 
 EFK
 

@@ -1,0 +1,210 @@
+	KUBERNETES
+
+IN THE MASTER - 
+	1) API SERVER - is the reception of the 
+	2) ETCD - is the database of the kubernetes cluster 
+	( ETCD contains all the data of the pods, users or ny data)
+	3) CONTROLLER MANAGER - it is going to control the worker nodes 
+	(checks if the worker node is running or not, what  is the capacity of the worker nodes, etc)
+	4) SCHEDULER - creates the pods and the containers 
+	
+all of the 4 are going to run as containers on the master server
+
+we can send messages to the kubernetes master through -  
+1) UI - user interface
+2) CLI - Kubectl (cli tool for kubernetes is kubectl)
+3) API - Application programming interface
+
+any of the commands through the above methods will reach the api server of the master first : 
+Api server is like the reception area 
+
+kubeadm - command to add node, manage node or anything with the node
+
+kubeadm init (on master)
+
+kubeadm join (on the worker)
+
+Any instructions from the controller manager is going to connect to the worker nodes 
+scheduler manager will connect to kubelet - hence agent based communication
+
+STEPS : 
+
+name all the nodes as master and worker nodes
+(in real time we have the names as master.example.com - example would be the company name)
+
+
+Docker configuration on master and worker nodes : 
+
+ cat <<EOF | sudo tee /etc/docker/daemon.json
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+"max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
+
+
+sudo systemctl enable docker
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+sudo swapoff -a
+
+sudo kubeadm init
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+cat ~/.kube/config (shows the info of config file)
+
+Install Container Network Interface (CNI)
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
+
+Worker Nodes initialization - Worker1 & 2
+
+sudo kubeadm token create --print-join-command
+(Add sudo to the join command inside the worker nodes)
+
+Verification:
+
+kubectl get nodes (on the master node to see the nodes)
+
+
+sudo kubeadm reset -f (resets the node which should not be runned on the node now)
+
+
+
+
+
+free -g (shows the memory in gb)
+or 
+free -m (shows the memory in mb)
+
+sudo kubeadm init (initializes the master as administrator)
+
+If you want to run the kubectl commands on the worker nodes then copy the admin.conf file to the worker 
+nodes... copying the admin.conf file so that the kubectl can connect to the api server
+
+sudo kubeadm token create --print-join-command
+
+
+
+
+
+
+
+
+
+
+NOTES : 
+
+devops people usually use the aws cli
+
+when we send a message through kubectl it is received by the Api server - Api server will send message 
+to scheduler - scheduler to control manager and etcd which will give the deatils of the availability 
+of the worker nodes and then the container is created depending on the availability
+
+Master which has 8gb ram /4vCPU's
+it can handle 25 worker nodes of 8gb ram /4vCPU's
+
+EXPLANATION OF KUBEADM INIT COMMAND : 
+
+remote version is much newer falling back to stable version- 
+
+Preflight - kubeadm will check if the node is good enough to work as master and then it will start 
+downloading the containers such as API, CM, Scheduler as they run as containers
+
+docker images command shows the apiserver, manaer and other images 
+
+Certs - generates the certificates for the interconnectivity of api with cm and scheduler 
+(simillar to password login)
+
+Kubeconfig - configuration of the 
+
+sudo ls /etc/kubernetes/ (check the contents of this folder)
+
+kubelet - is the agent
+
+control plane - 
+sudo ls /etc/kubernetes/manifest/ (contains all the specs)
+
+Container networking interface - 90 percent of people are using calico in the realtime, so right now 
+we are using calico
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TASKS : 
+
+Learn about namespaces and cgroups
+
+KUBERNETES IS VERY IMPORTANT : get deep into it
+
+HELM : Real time indsutry usage... mostly what we do in the industry
+
+
+Control Plane
+
+container  - has three components -  compute, network, storage
+
+AWS CLI - know about this
+terraform is - API - Application programming interface -  Know about this
+
+Heartbeat timestamp - worker nodes sends a message to the controller manager 
+
+see chef, puppet, dynatrace
+
+CRI - 
+
+https://kubernetes.io/releases/
+
+sudo ls /etc/kubernetes/
+cat admin.conf (to see the config file)
+
+SCP - scp labsuser@ipaddress/filepath /etc/kubernetes/admin.conf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DOUBTS : 
+
+Hi Swami, along with this trainings, what will you suggest additionally to grab good hold on K8s?
+
+CKA
+
+
+as a manager every 6 months you will be doing upgrades
+
+
+installation process in real time for both master and worker nodes
+
+so every worker node has to have same CRI or they can have different? 
+ans - best practice is to have the same CRI on all the worker nodes
+
+
+u said that we can run the kubectl on worker nodes right... but the certs are not generated since we had not done the kubeadm init... how would the worker node from kubectl connect to the Api and then contoller and scheduler to get the info...

@@ -74,10 +74,6 @@ kubectl get nodes (on the master node to see the nodes)
 
 sudo kubeadm reset -f (resets the node which should not be runned on the node now)
 
-
-
-
-
 free -g (shows the memory in gb)
 or 
 free -m (shows the memory in mb)
@@ -88,6 +84,233 @@ If you want to run the kubectl commands on the worker nodes then copy the admin.
 nodes... copying the admin.conf file so that the kubectl can connect to the api server
 
 sudo kubeadm token create --print-join-command
+
+
+kubectl get nodes -o wide (shows extra columns of the node info in a list)
+
+kubectl describe node <nodename> (shows detailed info about the nodes)
+
+kubectl config view (shows the config file information with all the contexts)
+
+
+CONTEXT IS THE ENVIRONMENT WE ARE IN (i.e., dev, staging or prod)
+
+kubectl config (shows the modules) 
+
+kubectl config current-context (shows the current context we are in)
+
+kubectl config use-context <contextname> (switch to other contexts)
+
+ex: kubectl config use-context kubernetes-admin@kubernetes
+
+kubectl config get-contexts <contextname> 
+
+kubectl cluster-info 
+
+kubectl cluster-info dump > /tmp/cluster-dump (creates a cluster-dump folder with the cluster dump 
+output)
+
+if we have 4 diff app in our company what we will do is we create a namespace inside the vms 
+where in each namespace a specific app container only is present
+
+app1 namespace -- app1 containers only
+app2 namespace -- app2 containers only
+
+if we have 2 worker nodes -- we will logically create a namespace for each and every application
+so if we have about 40 gb memory and we have 4 apps we will allocate the memory to each of the app
+as much as the app requires 
+if app1 need 15 gb -we allocate 15gb and app2 needs 5 gb we allocate 5gb and vice versa so that all 
+the applications adjust in the worker nodes
+
+HOW TO CREATE NAMESPACES
+kubectl get pods -n <namespace-name> 
+kubectl get all -n <namespace-name> 
+
+kubectl get pods -n kube-system (shows the container pods with the specific namespaces kube-system) 
+{add -o wide for more info}
+
+-n is used to create namespaces
+
+kubectl get pods -A (shows all the pods irrespective of namespaces)
+
+
+REGISTERING WORKER NODES : 
+
+to join the worker nodes to the cluster - 
+1st method we did was using join command 
+2nd method is - 
+
+create a .json file
+
+kubectl apply -f <filename> (to execute the file)
+
+kubectl get nodes (to see the nodes)
+
+to create a pod : 
+kubectl run <podname> --image <imagename> --port <portnumber> (to create a pod)
+kubectl run nginxpod --image
+
+kubectl get pods (shows pods)
+kubectl exec -it <podname> /bin/sh (to enter into the pod)
+kubectl exec -it <podname> <linuxcommand> (to run any one command on the pod)
+
+kubectl logs <podname> (shows logs)
+
+KUBERNETES DASHBOARD : (UI)
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/... (creates kubernetes dashboard)
+(to get this command search kubernetes dashboard in google and download the yaml file from there)
+
+kubectl delete -f https://raw.githubusercontent.com/kubernetes/dashboard/... (deletes the kubernetes dashboard created)
+
+kubernetes service means the loadbalancer 
+
+kubectl edit svc -n <namespace-name> <namespace-name>
+kubernetes get all -n kubernetes-dashboard 
+
+open browser in the master node machine on the desktop 
+htts://localhost:32012
+token - 
+kubectl -n <namespace> describe secret 
+Devops engineers wont use UI -- we use it to show others to see the pods like agile scrum master,etc
+
+BACKUP : 
+the first thing as we see the database is to take a backup 
+the main thing we do for a database is backup
+
+how to take a backup for ETCD : 
+
+etcdctl (suggestion to install etcdctl)
+sudo snap install etcd
+sudo apt install etcd-client
+
+to take backup - we need to connect to etcd through username and password
+
+Controller manager connects to the etcd through the pki file in /etc/kubernetes which contains all 
+the certiicates
+etcdctl snapshot save (you will get the whole command from the kubernetes.io website)
+
+etcdctl snapshot status (shows the information of the backup snapshot which was taken)
+
+restoring only works on a new etcd or if we have a brand new cluster... it wont work on the same 
+cluster
+Restore is only done when we have a multi master setup
+etcd-backup.db (file in which the backup is stored)
+
+UPGRADING KUBERNETES : 
+kubeadm version
+kubectl version
+kubelet --version
+kubectl get nodes
+These all show the versions of kubernetes
+
+kubeadm upgrade 
+
+WORKLOADS : 
+
+Main containers and sude car containers - 
+main - app, side car containers - security container or storage
+
+we create a minimum of 1 and maximum of 5 containers per pod
+
+Purpose or advantages of having multiple containers in a pod - 
+- latnecy is reduced between containers 
+- storage can be common for all the containers - 
+(same shared volume to have the same shared volume so that app and logs container can use the same shared volume)
+- IP address can be shared for all the containers - 
+(they have the same ip address as pods have the ip address) 
+
+the 3 major components of a VM or container
+Compute - Cpu and memory 
+network - 
+storage - 
+
+the sizes of the containers will vary inside a pod - example : app container will have more size than 
+other containers
+Note - kubernetes manages only pods and not containers
+we cannot also add or delete containers to a running pod
+
+HOW TO CREATE A MANIFESTS FILE : 
+
+Manifests file contains : 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: imagename
+spec: 
+  containers: 
+    - name: 
+kubectl api-resources ()
+
+kubectl explain pod (shows the api version, kind, metadata, specs - how to create a manifests file)
+kubectl explain pod.apiVersion (shows to create manifests file apiVersion)
+kubectl explain pod.spec.containers (shows containers)
+kubectl explain pod.spec.containers (shows mages)
+kubectl explain pod.spec.containers --recursive 
+(shows everything related to creating the manifests file)
+
+cat pod.yaml (is the manifests file)
+
+kubectl apply -f <filename> (to create pod from manifests file)
+Note : pod status will be running only if the contaienrs are in a running state
+podname and container name can be different 
+
+INIT-CONTAINER : 
+
+init container will start first and if the init container is successful only then the main container 
+will start 
+
+kubectl get pods <podname> -w (-w is watch state, the output keeps changing when a new event in 
+the command occurs)
+
+RESOURCE LIMITS : 
+
+Assigning limits to a container - like cpu ram, memory, etc
+
+STATIC PODS :
+
+static pod - when a pod is run only on one node. K8s admin chooses which worker node to run the pod
+creating a pod from the worker node through kubelet
+USECASE : we can monitor the traffic or any suspicious activity by creating a pod on the worker node 
+and it cannot be controlled by master node if we want 
+
+ADDING A .yaml manifests file inside the /etc/kubernetes/manifests creates a static pod inside the 
+node
+How to identify static pod from normal pod? - static pod will have the node-name attached to the 
+podname
+so any pod with the nodename attached to it is a static pod
+
+PET VS CATTLE : 
+the way we manage pet is different than how we manage cattle
+return from cattle is much more than pet
+pod = pet , deployment= cattle
+
+Deployment will delete the existing pods and create new pods
+
+kubectl get deploy (shows all deployments)
+
+kubectl explain deploy (explains how to write manifests deployment file)
+kubectl explain deploy.spec
+kubectl explain deploy.spec.template.spec
+
+kubectl get pods
+kubectl get replicaset 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -133,6 +356,43 @@ sudo ls /etc/kubernetes/manifest/ (contains all the specs)
 Container networking interface - 90 percent of people are using calico in the realtime, so right now 
 we are using calico
 
+Component which creates the containers on the worker nodes - scheduler
+
+
+ENVIRONMENT - Developer, staging , production
+App will be deployed in developing environment first then to the staging environment and then to the 
+production
+
+Development --> staging --> production
+
+In kubernetes - Kubernetes --> Development (master and worker 1&2)--> staging (master and worker -1-4)
+--> production (master and worker -1-10)
+(it means we have 3 different clusters in all the environments combined)
+
+cluster means -- master and worker together is called as a cluster
+
+Akshay (DevOps) (CKA)
+
+if we want to do get nodes : we have to go into each of the environment master and do get nodes
+connect to dev -- kubectl get nodes
+connect to prod --  kubectl get nodes
+how to switch between environment clusters and connect to all the master nodes from one to other? 
+
+MANIFESTS FILE :
+
+TO SET ALIAS FOR ANY COMMAND : alias k=kubectl 
+ex : k get pods is same as typing kubectl get pods
+
+ADDING A .yaml manifests file inside the /etc/kubernetes/manifests creates a static pod inside the 
+node
+
+
+
+
+
+
+
+
 
 
 
@@ -175,15 +435,19 @@ cat admin.conf (to see the config file)
 
 SCP - scp labsuser@ipaddress/filepath /etc/kubernetes/admin.conf
 
+Key Value store - KVS database
 
+know what this error is 
+W: An error occurred during the signature verification. The repository is not updated and the previous 
+index files will be used. GPG error: https://packages.cloud.google.com/apt kubernetes-xenial 
+InRelease: The following signatures couldn't be verified because the public key is not available: 
+NO_PUBKEY B53DC80D13EDEF05
 
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
 
+LATENCY FOR THE CONTAINERS
 
-
-
-
-
-
+DATATYPE : string list integer dictionary float (know about all these)
 
 
 
@@ -206,5 +470,14 @@ installation process in real time for both master and worker nodes
 so every worker node has to have same CRI or they can have different? 
 ans - best practice is to have the same CRI on all the worker nodes
 
+ERROR SOLVING : 
+nodes and master not ready : 
+sudo service kubelet status
+sudo service kubelet restart
 
-u said that we can run the kubectl on worker nodes right... but the certs are not generated since we had not done the kubeadm init... how would the worker node from kubectl connect to the Api and then contoller and scheduler to get the info...
+YAML 
+Good example - https://editor.swagger.io/
+Video learning - Yaml Tutorial | Learn YAML in 18 mins
+Cheat sheet - https://learnxinyminutes.com/docs/yaml/
+
+https://kubernetes.io/releases/

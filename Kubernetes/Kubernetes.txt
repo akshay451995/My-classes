@@ -71,8 +71,7 @@ Verification:
 
 kubectl get nodes (on the master node to see the nodes)
 
-
-sudo kubeadm reset -f (resets the node which should not be runned on the node now)
+sudo kubeadm reset -f (resets the node) [do not do it unless necessary]
 
 free -g (shows the memory in gb)
 or 
@@ -208,13 +207,13 @@ kubeadm upgrade
 
 WORKLOADS : 
 
-Main containers and sude car containers - 
+Main containers and side car containers - 
 main - app, side car containers - security container or storage
 
 we create a minimum of 1 and maximum of 5 containers per pod
 
 Purpose or advantages of having multiple containers in a pod - 
-- latnecy is reduced between containers 
+- latency is reduced between containers 
 - storage can be common for all the containers - 
 (same shared volume to have the same shared volume so that app and logs container can use the same shared volume)
 - IP address can be shared for all the containers - 
@@ -296,10 +295,43 @@ kubectl explain deploy.spec.template.spec
 kubectl get pods
 kubectl get replicaset 
 
+kubectl get deploy (shows the deployment)
+deployment - is simillar to service in docker... it contains replica pods with same containers, only 
+the name is different
 
+ADVANTAGE OF DEPLOYMENT: 
+1) we can create same multiple pods
+2) whenever there is an update, we can apply it through deployments
+3) scaling the number of pods - increase or decrease
 
+kubectl rollout history deploy <deploymentname> (shows all the history of the deployment)
+(Revision is same as commit in git)
 
+UPDATING: 
 
+kubectl set image deployment/<deploymentname> <containername=imagename> (updates the present image)
+kubectl rollout history deploy <deploymentname> (now it shows the second revision... it indicates it has updated)
+kubectl rollout history deploy <deploymentname> --revision=<no.of.your-revision> (describes the revision)
+kubectl get pods (new pods and containers are created with the updated image)
+kubectl get replicaset (shows the different replicasets)
+kubectl get rs (shows the different replicasets)
+for each and every revision a replicaset will be created (revision is same as commit in git)
+rolling update - in case of update kubernetes will create one pod and test it if it running good and 
+then it will delete the previous pods and create new pods
+CANARY DEPLOYMENT(in devops) - same as - ROLLING UPDATE(in kubernetes)
+rolling update - in case of an update if one pod is successfully created then the previous pod will be deleted and then 
+other pod is created another pod from the deployment is deleted and so on
+
+ROLLBACK: 
+
+kubectl rollout undo (deployment goes to previous version of the image)
+
+kubectl rollout undo deploy <deployment-name> (rollback to the previous version)
+kubectl get pods | grep deploy 
+
+kubectl rollout undo deploy <deployment-name> --to-revision=<no.of-revision-u-want-to-rollout-to>
+(to go back to any revision number you want)
+kubectl rollout undo deploy nginx-deployment --to-revision=1 (to rollback to revision 1)
 
 
 

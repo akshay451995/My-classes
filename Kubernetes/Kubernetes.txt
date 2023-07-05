@@ -319,8 +319,13 @@ for each and every revision a replicaset will be created (revision is same as co
 rolling update - in case of update kubernetes will create one pod and test it if it running good and 
 then it will delete the previous pods and create new pods
 CANARY DEPLOYMENT(in devops) - same as - ROLLING UPDATE(in kubernetes)
-rolling update - in case of an update if one pod is successfully created then the previous pod will be deleted and then 
-other pod is created another pod from the deployment is deleted and so on
+rolling update - in case of an update if one pod is successfully created then the previous pod will 
+be deleted and then other pod is created another pod from the deployment is deleted and so on
+
+kubectl set image deployment/<deploymentname> <containername=imagename> --record (record will set a 
+change cause or message as to why the revisison had been done- simillar to commit message in git)
+
+Check the change cause by : kubectl rollout history deploy <deploymentname> 
 
 ROLLBACK: 
 
@@ -332,6 +337,134 @@ kubectl get pods | grep deploy
 kubectl rollout undo deploy <deployment-name> --to-revision=<no.of-revision-u-want-to-rollout-to>
 (to go back to any revision number you want)
 kubectl rollout undo deploy nginx-deployment --to-revision=1 (to rollback to revision 1)
+
+MANUAL SCALING: 
+
+scale up and scale down 
+kubectl scale --help (shows all the modules)
+kubectl scale deployment <deploymentname> --replicas=<no.ofreplicasuwant>
+kubectl get rs or kubectl get replicaset (shows the replicasets)
+kubectl get deploy (shows the deployments, depending on the number of rs u can scale up and down)
+
+when to use replica mode and glocal mode: 
+replica mode is to scale up and down, glocal mode cannot be scaled
+global mode is only used when we need only one container in all the nodes
+
+DAEMON SETS: 
+there will be one pod which will be running on all the nodes 
+Realtime use case: fluentd
+Fluentd - it will collect the logs from any application and will store them in a central space
+
+kubectl get daemonset or kubectl get ds -A (shows all daemon sets) 
+(added -A for all namespaces) 
+
+daemonset.yaml
+
+kubectl apply -f daemonset.yaml
+
+kubectl get ds -n kube-system 
+kubectl get pods -n kube-system -o wide | grep fluent
+
+JOBS AND CRONJOBS: 
+
+updating the database : 
+the app cam be updated by set image but how to update database? 
+adding the tables and then upadting the deployment: 
+On the existing database pods we need to add tables 
+
+A migration job pod is created (simillar to init container) and when it is successful a new pod with 
+version 2 is created 
+
+Tool to update : ArgoCD 
+
+ArgoCD: 
+step -1 : add 8 new tables [job]
+step-2 uber 1.5 [update deployment]
+
+Job pod: 
+a given job is done by the created pod and it remains without using any further resources 
+suppose the job is to print date or message it craetes a pod and prints the message and remains
+k logs <podname> 
+crontab - for scheduling the job
+***** 
+1st * - minute 
+2nd* - hour 
+3rd* - day of the month 
+4th* - month 
+5th* - day of the week
+
+kubectl apply -f cronjob
+kubectl get cronjob
+kubectlget jobs
+kubectlget jobs -w ( -w to see the execution status of the command)
+New jobs/jobpods get created everytime based on the schedule set in the cronjobs
+
+NAMESPACE:  
+
+kubectl get namespace or kubectl get ns
+example: if i have 5 worker nodes and i have diff apps to deployed on the worker nodes, i have to 
+provide a capacity for all of them to run 
+to group resources we have to craete namespaces
+kubectl create ns insta
+kubectl create ns meta 
+kubectl create ns whatsapp
+
+USES OF NAMESPACES: 
+1) same resources under 1 namespace - so when we create a deployment we create them inside the 
+namespaces
+2) set quota to restrict the resources 
+3) set roles or access restrictions - users under the namespace can only modify or view the resources 
+under their namespaces 
+
+kubectl apply -f <deployment-filename> -n <namepsacename> ()
+ex: kubectl apply -f deploy -n insta 
+
+kubectl get all -n <namepsacename> (shows all the resources under the namespace)
+kubectl delete ns <namespacename> (deletes the namespace)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -418,9 +551,18 @@ ex : k get pods is same as typing kubectl get pods
 ADDING A .yaml manifests file inside the /etc/kubernetes/manifests creates a static pod inside the 
 node
 
+api server, controller scheduler and etcd all run on the kube-system namespace and also the daemon sets
 
+KUBERNETES DOCUMENT: 
 
+kubernetes.io/docs/home
 
+ALIAS: 
+
+alias k=kubectl
+file for alias: 
+vi .bashrc (in the root directory in the .bashrc file you can set the alias by adding the lines in the 
+file and then type command <source .bashrc> and the alias is ready to use)
 
 
 
@@ -480,6 +622,9 @@ sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://pack
 LATENCY FOR THE CONTAINERS
 
 DATATYPE : string list integer dictionary float (know about all these)
+
+APPLICATION CONFIGURATION - READ ABOUT IT
+
 
 
 

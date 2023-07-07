@@ -383,11 +383,11 @@ step-2 uber 1.5 [update deployment]
 
 Job pod: 
 a given job is done by the created pod and it remains without using any further resources 
-suppose the job is to print date or message it craetes a pod and prints the message and remains
+suppose the job is to print date or message it creates a pod and prints the message and remains
 k logs <podname> 
 crontab - for scheduling the job
 ***** 
-1st * - minute 
+1st* - minute 
 2nd* - hour 
 3rd* - day of the month 
 4th* - month 

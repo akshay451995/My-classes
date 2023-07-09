@@ -399,6 +399,252 @@ kubectlget jobs
 kubectlget jobs -w ( -w to see the execution status of the command)
 New jobs/jobpods get created everytime based on the schedule set in the cronjobs
 
+Configuration Basics : 
+
+in the app we have 2 files :
+1) code --> container image
+2) config --> 
+Code and config have to be kept seperately 
+Config should be kept different for each and every environment - like diff env like dev, staging and 
+prod - different usernames for web in dev, staging and prod and also diff passwords for diff env
+different usernames for app in dev, staging and prod and also diff passwords for diff env
+different usernames for DB in dev, staging and prod and also diff passwords for diff env
+
+For creating microservices: 
+Standard for creating microservices - configuration is changing between environments
+configuration will be created as a property file in dev, staging and production seperately 
+config file includes the database name, username and passwords 
+
+ENV : 
+
+(env in the command line will show various environment variables)
+echo $USER - shows current user
+
+cat env 
+k apply -f env 
+k exec -it envar-demo /bin/shv
+inside the pod :
+env - shows all the environment variables
+
+CONFIG MAP : 
+
+is the configurations which are being stored in the kubernetes
+advantage of config map over env - if there a multiple deployments, they can access frm a central 
+location
+
+cat cm
+kubectl aply -f cm 
+k get cm
+k describe cm <cm-name>
+
+we should not store passwords in a config map as it is human readable and not encrypted
+
+if we want to apply the changes to the config map  - we have to delete the pods and then create new pods 
+- suppose if we want to change the username or password of the env 
+k rollout restart deploy <deployment-name> (all the previous pods get deleted and new pods will be created)
+
+k get pods show the newly created pods in the deployment 
+
+(Note: it is not recomment=ded to change anything in the running pod, rollout or deleting and creating
+new pods is proper method) 
+
+whenver an application is getting deployed it will look for the config map file
+the file will be stored in the volume 
+
+(Note: busybox- is one of the smallest container images used for testing the pods)
+
+SECRETS : 
+
+we store all the passwords inside the secrets(k8s) - the password will be encrypted
+if we store both the username and password inside the secrets - bt will be encrypted
+when we store inside a pod it will be decrypted
+DevOps-> usr/pwd-> secrets(k8s) - Encrypted
+Deploy -> Pod -> Container -> Decrypted
+
+cat sec 
+k apply -f secret 
+k descrice secret <secretname>
+if we creare a pod with specifying secret the it will not be in an encrypted format 
+
+Note: if it is a non-sensitive data we can store the variable in the config map and if it is a 
+sensitive data we can store it in the secrets
+
+LABELS AND SELECTOR : 
+We can set labels to all the kubernetes servcies 
+kubectl get nodes --show-labels (shows all the labels of all nodes)
+kubectl get nodes -l kubernetes.io/os=linux (shows all the nodes with linux os)
+use case scenario - when we want to specify the linux nodes only or any other resources only we can 
+apply the label search
+based on the labels we can select onto which node we can deploy the pods 
+
+Selector : where we mention which label to choose to deploy a kubernetes service
+
+2 tier architeccture (example): 
+Frontend deployment(3 nodes) --> Redis master deployment (1 node)
+			    Redis slave deployment (2 nodes)
+
+kubectl apply -f kubesample.yaml
+k get pods -l tier=backend (shows all the pods in which the label tier=backend was set)
+k get pods -l tier=frontend (shows all the pods in which the label tier=frontend was set)
+(label is simillar to grep function)
+
+to query 2 or more different labels:
+kubectl get pods -l 'tier in (backend, frontend)' (shows all the backend and frontend pods)
+kubectl get pods -l 'tier in (backend), role notin (slave)' (shows all the backend pods and shows the 
+master pod and hides the slave pods)
+kubectl get pods -l 'tier in (backend), role in (master)' (shows all the backend pods and shows the 
+master pod)
+(in - shows the given label notin - hides the given label)
+kubectl get pods -l 'tier in (backend), role in (slave)' (shows all the backend pods and shows the 
+slave pods)
+
+MONITORING AND LOGGING : 
+(logging - fluentd, metric server - tools with which we get the usage of memory and cpu,etc)
+kubectl top pods (shows cpu and memory of all pods) (inbuilt monitoring tool)
+(other montioring tools - prometheus, grafana, etc)
+kubectl top nodes (shows cpu and memory of nodes)
+
+AUTOSCALING :
+adding or removing the nodes based on the resource utilization
+
+Cloud VM AutoScaling : (autoscaling for nodes)
+Desired:3 Max:5
+Threshold
+  CPU -min:10% max:80%
+explanation: scaling up - if the load on all the nodes is more than 80% then the 4th node will be created and if 
+the load is increased for more than 80% on the 4th node too then the 5th node is created 
+if the 5th node is also getting a load more than 80% then it will create an alert to the devops 
+engineer to increase the nodes by validating the issue or because of the user number increase 
+
+scaling up - if the load is lesser than 10% of utilization then the 4th or the 5th node will be deleted
+
+Kuberenetes pod autoscaling : (autoscaling for pods)
+replica:3 max:5
+threshold
+  CPU min:10% max:80%
+explanation: simillar to nodes
+
+HORIZONTAL POD AUTOSCALING (HPA): 
+kubectl autoscale --help
+kubectl scale deploy <deployment-name> --replicas=2 (setting the replica number to 2)
+kubectl autoscale deploy <deployment name> --min=3 max=5 --cpu-percent=40 ( autoscaling)
+kubectl get deploy shows min 3 pods created
+kubectl get hpa
+kubectl autoscale deploy nginx-deployment --min=4 --max=5 --cpu-percent=40
+kubectl get pods -l app=nginx
+kubectl get hpa
+
+SELF HEALING PODS : 
+probes - 
+probing - testing if an app is running or not in regular time intervals
+
+2 types of probes: 
+1) Liveness probe 
+detects when a pod enters
+2) Readiness probes
+
+Pod 
+  ContainerA 
+  ContainerB (app container)
+    Probe: Liveness (container) and Readiness (app)
+       URL: api/health.html 
+           period: 5 sec 
+  ContainerC 
+It keeps checking for the file for every 5 secs 
+(if the response comes from this example file then the container is running or else there is 
+some issue)
+
+Liveness - whether ur container is running or not 
+Readiness - whether ur application is running or not
+
+liveness - when the probe fails then the container automatically goes into restart as such
+A temporary file is created and a cat command is passed to check if the file is present and we 
+are getting a response of cat from that file then the probe passes
+
+readiness - when the probe fails then the container is stopped 
+Readiness looks for application status
+A temporary file is created and a cat command is passed to check if the file is present and 
+we are getting a response of cat from that file then the probe passes
+- only when the container is running it will accept the traffic
+
+Liveness checks for the container and readiness checks for the application
+if liveness probe fails then it will restart the container 
+if readiness probe fails then it will stop the traffic and the container is stopped 
+
+kubectl explain pod.spec.containers.livenessProbe.failureThreshold
+kubectl explain (explains any of the specs u want - very useful to know things)
+
+HELM : 
+
+installation of helm
+sudo snap install helm - follow the instructions
+note: apt is a package manager
+
+helm repo search bitnami
+if we want to install any tool on the kubernetes cluster we go with helm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 NAMESPACE:  
 
 kubectl get namespace or kubectl get ns
@@ -529,7 +775,7 @@ App will be deployed in developing environment first then to the staging environ
 production
 
 Development --> staging --> production
-
+inside each env we have web, app and db
 In kubernetes - Kubernetes --> Development (master and worker 1&2)--> staging (master and worker -1-4)
 --> production (master and worker -1-10)
 (it means we have 3 different clusters in all the environments combined)
@@ -565,7 +811,8 @@ vi .bashrc (in the root directory in the .bashrc file you can set the alias by a
 file and then type command <source .bashrc> and the alias is ready to use)
 
 
-
+In any repository - 1 is the source code where java and other things will be there
+and the other is a configuration file
 
 
 
@@ -625,7 +872,7 @@ DATATYPE : string list integer dictionary float (know about all these)
 
 APPLICATION CONFIGURATION - READ ABOUT IT
 
-
+Workloads - very important
 
 
 

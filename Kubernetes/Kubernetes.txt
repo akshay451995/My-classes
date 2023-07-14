@@ -1,4 +1,4 @@
-	KUBERNETES
+ 	KUBERNETES
 
 IN THE MASTER - 
 	1) API SERVER - is the reception of the 
@@ -574,6 +574,174 @@ if readiness probe fails then it will stop the traffic and the container is stop
 kubectl explain pod.spec.containers.livenessProbe.failureThreshold
 kubectl explain (explains any of the specs u want - very useful to know things)
 
+SCHEDULING :
+
+node selector - 
+nodeName - to be used to specify which node the pod has to be created
+nodeSelector - 
+using node labels : 
+Note: How to dynamically add labels when the resources are running -
+kubectl label node <nodename> <labelname=value>
+kubectl label node workernode1 disktype=ssd (setting a label disktype=ssd)
+kubectl label node <nodename> <labelname-> (to delete a sepcific label)
+kubectl label node workernode1 disktype-  (setting to delete a label disktype)
+
+NODE AFFINITY : 
+
+Affinity - means if condition is TRUE --> pod gets created 
+  condition (node selectors) --> node affinity
+  condition (pod selectors) --> pod affinity
+Anti-Affinity
+  if condition is TRUE --> pod will not get created   
+  condition (pod selectors) --> pod Anti-Affinity
+
+Condition
+  requiredDuringScheduling = Must have
+  preferredDuringScheduling = May have
+kubectl explain pod.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution (gives description)
+
+kubectl label node <ndoename> disktype=ssd (to set disktype label)
+label node <ndoename> disktype=ssd network=fast (to set disktype and network label for the nodes)
+to delete the labels: 
+kubectl label node <nodename> <labelname>-
+ex: kubectl label node <nodename> disktype-
+
+kubectl get nodes -l disktype=ssd (to see disktype label)
+kubectl get nodes -l disktype=ssd network=fast (to see disktype and network label for the nodes)
+
+POD AFFINITY : 
+
+Redis 
+  - 2 pods on the same node
+    if condition is TRUE - do not create a pod 
+    Anti-Affinity
+Webserver - 2 conditions
+  - 2 pods on the same node
+    if condition is TRUE - do not create a pod 
+    Anti-Affinity
+  - only create when redis is there
+    Affinity
+
+Note : first we deploy the backend, i.e., redis and then the forntend, i.e., webserver
+
+TAINTS AND TOLERATIONS : 
+
+Taint is like a label set on nodes 
+
+taint is a property which is set on nodes and tolerations is a property which is set on pods
+if toleration is set to the taint property then the pod will be created on the node
+
+for a specific app which requires specific dedicated nodes for themselves- if taints are set for the 
+nodes, then if we specify the tolerations then only the pods will be created on the nodes, any 
+manifests file with default values does not create any pods on these nodes 
+
+SECURITY CONTEXT : 
+
+if there is any application which needs elevated privileges as an admin or root then they go with 
+security context by providing user id and group id
+
+PRIORITY : 
+if there is a pod priority being set then the pods which are set as high priority they will be 
+created first
+
+kubectl get Priority Class (shows all the PriorityClass with the default PriorityClasses)
+
+Note : kubectl api-resources (to know the api versions of all the manifest files for different services 
+like deployment, pods, nodes, configmaps)
+
+NETWORKING : 
+
+Note: Deployment - means identical pods
+
+loadbalancer - when the traffic comes from the users, the request first goes to the loadbalancer and then the 
+loadbalancer sends the traffic to the available pods 
+loadbalancer is a service which receives the requests
+loadbalancer is referred to as service 
+
+All the different kinds of traffic will be received by a service port  --> and all the traffic which 
+is received on the service port will be sent to the target port --> and the target port will divert 
+the traffic to any one of the container port
+target port is exactly simillar to the contianer port... ex: if the port is set 80 for a deployment 
+then all the containers will have the same port as 80 and the target port as well will be 80
+- Service port can be anything 
+
+Types: 
+Network loadbalancer
+internal loadbalancer 
+external loadbalancer 
+application loadbalancer
+
+We have a service for each deployment
+
+PODS ARE EPHEMERAL - ephemeral means they are temporary,i.e, when they are updated the old pods are 
+deleted and new pods are created
+
+SERVICE DISCOVERY : 
+
+service needs to identify all its pods, so it will use same labels to query and it will get the pods 
+which have the same labels
+whenever new pods are created it will look for the labels
+
+kubectl apply -f kube-sample.yaml
+kubectl get svc <servicename> (shows service details)
+kubectl get endpoints <servicename> (shows the endpoints or ips the service can connect to)
+kubectl get ep <servicename>
+kubectl describe svc <sevricename> (shows all the details of the service with the service port and 
+target port and the endpoints, ip, etc)
+
+Note: Deployment -means identical pods
+      service - is a loadbalancer on the top of those identical pods
+
+SERVICE TYPES : 
+
+(basics - loadbalancer types - internal loadbalancer and external loadbalancer 
+internal loadbalancer - if there is any application running insdie aws, and if the same 
+application wants to connect with another application which is also running inside the same aws, they
+can talk to each other through internal loadbalancer)
+
+(the traffic which is being received by the redis slave and redis master from the frontend server is 
+called internal traffic) (example of internal traffic - database)
+
+Internet traffic - anyone can access from across the world 
+Internal traffic - anyone within a defined space can access the traffic - ex: jira can be accessed 
+from only inside a specific office or through vpn
+
+if you are planning to use a service as an internal loadbalancer or internal traffic/ internal uses 
+then we will define the network type as NodePort 
+
+kubernetes port numbers are automated - nodeport numbers range from - 30,000 to 32,000
+
+TYPES: 
+ClusterIP - if i have a database or cluster which need to access within then those are considered 
+to be clusterIP 
+NodePort - if the traffic needs to exposed to the outside then we would have it as NodePort  
+
+Network testing pod creation : 
+kubectl run curl --image=radial/busyboxplus:curl -i --tty
+
+DNS AND NETWORK COMMUNICATION :
+ 
+curl nslookup google.com
+to connect to same namespace service from the default namespace testing pod
+curl http://frontend 
+from the test pod
+
+to connect to another namespace service from the default namespace testing pod
+nslookup <svc-name>.<namespace> 
+nslookup nginx.test
+or 
+curl http://nginx.test
+
+to connect to another deafult namespcae service pod from the default namespace testing pod
+nslookup <ipaddress in dashes-->.default.pod.cluster.local
+curl http://<ipaddress in dashes-->.default.pod.cluster.local
+curl http://<fqdn>
+(fqdn - Fully Qualified Domain Name)
+
+to connect to another namespace service pod from the default namespace testing pod
+nslookup <ipaddress in dashes-->.<namespacename>.pod.cluster.local
+curl http://<ipaddress in dashes-->.<namespacename>.pod.cluster.local
+
 HELM : 
 
 installation of helm
@@ -583,37 +751,33 @@ note: apt is a package manager
 helm repo search bitnami
 if we want to install any tool on the kubernetes cluster we go with helm
 
+(Package manager - means it installs all the dependencies along with the core package, also used for 
+updating or upgrading or deleting (ex: apt, yum))
 
+if we want jenkins in kubernetes we need to specify helm install jenkins
 
+helm repo add bitnami https://charts.bitnami.com/bitnami (downloads the helm repositories)
+helm repo ls
+helm repo update (updates all the tools in the helm repositories)
 
+helm search repo bitnami (shows all the tools which can be installed by helm)
 
+helm install <deployment-name> bitnami/<toolname> (install any tool and creates a new deployment)
+helm install test-nginx bitnami/nginx (installs nginx inside a newly created test-nginx deployment)
+kubectl get svc (shows the test-nginx svc created)
 
+curl https://localhost:<nodeportno.> (shows the nginx installed application from the svc)
+to change the network from loadbalancer to NodePort
+vi values.yaml 
+inside the file in the place of loadbalancer we can give NodePort
+if we want to add replicas then in the place of replica count we have to give 3
+then after changing the values to install the package with a new deployment: 
+helm install <deployment-name> <toolname> --values values.yaml
+ex: helm install test2-nginx <bitnami/nginx> --values values.yaml
 
+helm uninstall <deploymentname> <toolname>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+(git clone https://github.com/IBM/helm101.git)
 
 
 
@@ -874,7 +1038,7 @@ APPLICATION CONFIGURATION - READ ABOUT IT
 
 Workloads - very important
 
-
+Fault tolerance & Elasticity
 
 
 
@@ -905,3 +1069,5 @@ Video learning - Yaml Tutorial | Learn YAML in 18 mins
 Cheat sheet - https://learnxinyminutes.com/docs/yaml/
 
 https://kubernetes.io/releases/
+
+LEARN HELM AND HTO IN DEEP

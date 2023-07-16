@@ -688,6 +688,8 @@ kubectl get endpoints <servicename> (shows the endpoints or ips the service can 
 kubectl get ep <servicename>
 kubectl describe svc <sevricename> (shows all the details of the service with the service port and 
 target port and the endpoints, ip, etc)
+How will the service identify that these are the pods to which it has to share the traffic?
+A: the pods will have the labels and the service file will have the selectors
 
 Note: Deployment -means identical pods
       service - is a loadbalancer on the top of those identical pods
@@ -705,7 +707,7 @@ called internal traffic) (example of internal traffic - database)
 Internet traffic - anyone can access from across the world 
 Internal traffic - anyone within a defined space can access the traffic - ex: jira can be accessed 
 from only inside a specific office or through vpn
-
+it is also called as NodePort
 if you are planning to use a service as an internal loadbalancer or internal traffic/ internal uses 
 then we will define the network type as NodePort 
 
@@ -778,6 +780,140 @@ ex: helm install test2-nginx <bitnami/nginx> --values values.yaml
 helm uninstall <deploymentname> <toolname>
 
 (git clone https://github.com/IBM/helm101.git)
+
+INGRESS : 
+
+we cannot have different node ports to different namespaces for same application, in that case we use 
+ingress
+there are many ingress controller tools.
+we are now using nginx ingress controller
+for entire kubernetes cluster we only have one node port in realtime - and the traffic is diverted to
+different containers through ingress (simillar to phone number extensions)
+
+when a traffic from outside comes - it is diverted to a specified service through the ingress 
+controller like: 
+http://localhost:<potrtno.>/service
+i.e., http://localhost:<potrtno.>/cart --> diverts the traffic to cart 
+http://localhost:<potrtno.>/account --> diverts the traffic to account
+http://localhost:<potrtno.>/orders --> diverts the traffic to orders 
+
+from the service the loadbalancer acts and diverts the traffic to different pods based on their 
+availability
+
+Ingress controller is like a router to different services	
+
+kubectl get all -n <namesapcename> (shows all the pods deploymnets and service etc, everything related 
+to the namespace)
+kubectl get all -n ingress-nginx (shows all the pods deploymnets and service etc, everything related 
+to the namespace)
+
+kubectl apply -f <filename> (for the ingress)
+
+kubectl get deploy cart
+kubectl get deploy account
+kubectl get deploy orders
+
+to get to know the port numbers of the deployments:
+kubectl describe pod <podname> (shows all the details along with the port)
+
+to create a service through command line and expose a port number without a manifests file:
+
+kubectl expose deploy cart --name <servicename> --port 80
+kubectl get svc cart
+kubectl get pods -o wide | grep cart 
+kubectl get ep cart  
+kubectl describe svc cart
+
+kubectl get deploy accounts
+to write the manifests file if we need help - we can do kubectl explain svc.spec.ports
+kubectl expose --help | grep port (to get help to write the expose command)
+kubectl expose deploy accounts --name accounts --port 80
+kubectl get svc
+kubectl describe svc accounts
+
+kubectl expose deploy orders --name orders --port 80 --target-port 8080
+kubectl describe svc orders
+
+kubectl apply -f ing
+kubectl get ingress / kubectl get ing 
+
+kubectl get ing <ingress-name>
+
+to test if the ip is working : 
+curl http://localhost:30157/cart (nginx)
+curl http://localhost:30157/orders (tomcat)
+curl http://localhost:30157/accounts (httpd)
+
+the container is exposed only when we configure the route in the ingress - it knows where to divert 
+the traffic
+kubectl describe ing <ingress-name>
+
+NOTE : 
+THERE ARE DIFFERENT TYPES OF INGRESS CONTROLLERS SUCH AS HTO, REGEX AND NGINX. FOR PRACTICE WE HAVE 
+USED NGINX INGRESS CONTROLLER
+
+
+STORAGE (VOLUMES): 
+
+kubectl explain pod.spec.volumes (helps you to write a manifests file)
+kubectl explain pod.spec.volumes.emptyDir
+what is empty directory - when a pod is been created on a worker node on the same worker node we 
+are going to create a temporary volume
+
+1) to share the storage betwwen containers : 
+empty directory - temporary directory - when the pod is going to run the volume will be there and 
+when the pod is deleted the volume will be deleted
+
+in the manifests file to which container we mention the volumeMounts those containers only get 
+attached to the volumes
+
+mountPath is the path where we want the data to be stored inside the container 
+
+kubectl apply -f pod-vol-emptyDir.yaml
+pod/sharevol created
+kubectl get pods sharevol
+to enter into the different containers of the pods :
+kubectl exec -it sharevol -c c1 /bin/sh
+kubectl exec -it <podname> -c <containername> /bin/sh
+
+if we create a file inside the mountpath on one of the containers and then exec into other container 
+we can see the file inside the mountpath which we gave for this container
+
+2) to share the storage betwwen pods : 
+NOTE : know about daemon sets
+
+The purpose of fulentd daemonset pods is to fetch the logs from all the containers and push them to 
+central directory (central directory = elastic search)
+directory into which the logs are written for the pods is - /var/log
+in this type when the worker node is deleted the storage is deleted 
+
+kubectl explain pod.sepc.volumes	
+
+
+
+3) volumeName - configMap volume - where the config map files will be saved as shared storage
+4) volumeName - secrets - where the secrets file like username and password will be saved as shared 
+storage
+
+
+emptyDir - shared storage is created inside the pod 
+hostPath - shared storage is created inside the node
+configMap - 
+secrets - 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

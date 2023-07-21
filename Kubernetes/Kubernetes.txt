@@ -20,9 +20,9 @@ Api server is like the reception area
 
 kubeadm - command to add node, manage node or anything with the node
 
-kubeadm init (on master)
+sudo kubeadm init (on master)
 
-kubeadm join (on the worker)
+sudo kubeadm join (on the worker)
 
 Any instructions from the controller manager is going to connect to the worker nodes 
 scheduler manager will connect to kubelet - hence agent based communication
@@ -653,8 +653,8 @@ NETWORKING :
 
 Note: Deployment - means identical pods
 
-loadbalancer - when the traffic comes from the users, the request first goes to the loadbalancer and then the 
-loadbalancer sends the traffic to the available pods 
+loadbalancer - when the traffic comes from the users, the request first goes to the loadbalancer and 
+then the loadbalancer sends the traffic to the available pods 
 loadbalancer is a service which receives the requests
 loadbalancer is referred to as service 
 
@@ -697,7 +697,7 @@ Note: Deployment -means identical pods
 SERVICE TYPES : 
 
 (basics - loadbalancer types - internal loadbalancer and external loadbalancer 
-internal loadbalancer - if there is any application running insdie aws, and if the same 
+internal loadbalancer - if there is any application running inside aws, and if the same 
 application wants to connect with another application which is also running inside the same aws, they
 can talk to each other through internal loadbalancer)
 
@@ -898,9 +898,24 @@ storage
 
 emptyDir - shared storage is created inside the pod 
 hostPath - shared storage is created inside the node
-configMap - 
-secrets - 
+configMap - attaches the configMap onto the new container inside a mountpath
+secrets - attaches the secrets file to a new container inside a mountpath
 
+PERSISTENT VOLUMES :
+
+NOTE: KNOW ABOUT STORAGE ATTACHED NETWORK
+the disk/drive where we have the OS+data, that is called the root volume - primary hard disk
+the disk which contains all the data is called secondary hard disk
+
+if we format a system then the data from the primary hard disk is erased but the secondary disk data
+is not affected
+if we are moving to a new computer we can also attach the secondary hard disk with its data into the 
+new computer
+the secondary hard disk can only be attached to one pc at a time, it cannot be attached to multiple 
+pcs
+
+Persistent volumes is the same as secondary volume -- in which the pc role is same as the pod
+we can attach a secondary volume to a pod
 
 
 

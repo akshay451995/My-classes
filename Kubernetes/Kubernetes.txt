@@ -903,7 +903,8 @@ secrets - attaches the secrets file to a new container inside a mountpath
 
 PERSISTENT VOLUMES :
 
-NOTE: KNOW ABOUT STORAGE ATTACHED NETWORK
+NOTE: KNOW ABOUT STORAGE ATTACHED NETWORK(SAN) and EBS
+
 the disk/drive where we have the OS+data, that is called the root volume - primary hard disk
 the disk which contains all the data is called secondary hard disk
 
@@ -916,10 +917,19 @@ pcs
 
 Persistent volumes is the same as secondary volume -- in which the pc role is same as the pod
 we can attach a secondary volume to a pod
+in case of PV - we can attach to multiple pods with the help of access modes - readwritemany
+first we create pv (pv's are not attached to any namespaces they are independent)
+then after the pv is created we attach the pv to a pod - this is called persistent volume claim (PVC)
 
+if we have a pv with 10gb and if we mention the pvc with requirement of only 3gb still the same will 
+be allocated. it is like a pendrive 
 
-
-
+In normal kubernetes: 
+we have to create a pv and then a pvc and then a pod and in the pod manifest we have to mention 
+the attachment of the pod to the pvc
+In Azure Kubernetes: 
+if we create a pvc a pv is created based on our memory request so that there is no memory wastage 
+only the required amount specified in the pvc will be allocated
 
 
 

@@ -977,16 +977,58 @@ Kubernetes Permissions:
 
 CRUD - create, read, update, delete
 
-Read - get, describe
-Delete - delete
-Update - apply, set, scale
+Permissions: 
 Create - expose, run
+Read - get, describe, logs
+Update - apply, set, scale, exec
+Delete - delete
+
+Roles:- [Permissions+resources] to give what permissions on what resources
+Admin - CRUD + Resources(Pod, deploy, svc, ds, secrets, cm) [or we can also write all permissions as *]
+	CRUD + Resources(*)=*.*
+Developer - RU + Resources(Pod, deploy, svc, ds, secrets, cm)
+Operations - RUD + Resources(Pod, deploy, svc, ds, secrets, cm)
+Viewer - R + Resources(Pod, deploy, svc, ds, secrets, cm)
+
+Rolebinding: [User/Group + Role]
+Example : swami + Operations
+ 	  Dev Group + Developer
+ 	  Project Manager + Viewer
+
+Each and every namespace will have a role and rolebinding: 
+So that the users who are a part of one application can have access only to that application namespace
+rather than all the different namespaces 
+
+Example: we are in a Metaverse organisation
+	FB namespace --> Role & rolebinding --> [Swami+Operations] + [FB] 
+(Swami from operations gets access only to the FB namesapce)
+	Whatsapp namesapce
+	Insta namesapce
+Cluster admin/ super admin: the one who has access to everything even creating admin and namespaces
+NS - CRUD 
+Nodes
+Roles
 
 
+kubectl create role <rolename> --verb <permission> --verb <permission> --resource <resource-name> -n <namespace-name>
+kubectl describe role -n <namespace-name>
 
+for verification / validation of complaints raised as that the person could not view resources or 
+has permission denied while viewing the resources then we can access the cli as the user himself with:
 
+kubectl <command> --as <username>
+kubectl get deploy -n <namespacename> --as swami
 
+kubectl explain role --recursive
 
+kubectl describe clusterrole
+kubectl decribe clusterrole admin
+
+to give cluster admin right to any user - 
+kubectl create clusterrole nodes-view --verb=get,list --resource nodes
+kubectl create clusterrolebinding nodes-view-swami --clusterrole nodes-view --user-swami
+
+kubectl get nodes --as swami
 
 
 

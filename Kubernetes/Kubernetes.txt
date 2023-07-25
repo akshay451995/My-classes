@@ -121,6 +121,29 @@ as much as the app requires
 if app1 need 15 gb -we allocate 15gb and app2 needs 5 gb we allocate 5gb and vice versa so that all 
 the applications adjust in the worker nodes
 
+NAMESPACE:  
+
+kubectl get namespace or kubectl get ns
+example: if i have 5 worker nodes and i have diff apps to deployed on the worker nodes, i have to 
+provide a capacity for all of them to run 
+to group resources we have to craete namespaces
+kubectl create ns insta
+kubectl create ns meta 
+kubectl create ns whatsapp
+
+USES OF NAMESPACES: 
+1) same resources under 1 namespace - so when we create a deployment we create them inside the 
+namespaces
+2) set quota to restrict the resources 
+3) set roles or access restrictions - users under the namespace can only modify or view the resources 
+under their namespaces 
+
+kubectl apply -f <deployment-filename> -n <namepsacename> ()
+ex: kubectl apply -f deploy -n insta 
+
+kubectl get all -n <namepsacename> (shows all the resources under the namespace)
+kubectl delete ns <namespacename> (deletes the namespace)
+
 HOW TO CREATE NAMESPACES
 kubectl get pods -n <namespace-name> 
 kubectl get all -n <namespace-name> 
@@ -931,94 +954,33 @@ In Azure Kubernetes:
 if we create a pvc a pv is created based on our memory request so that there is no memory wastage 
 only the required amount specified in the pvc will be allocated
 
+RBAC : 
 
+Example: Simplilearn
 
+Permissions: start lab, end lab, reset lab, Extend lab
 
+Roles - Learner - (start and end lab only)
+	trainer - (start and end lab only)
+	LSM 
+	Support engineer
+	Lab engineer (start, end, reset, extend labs)
+	sales
 
+Role binding --> User (Swami) + Role(trainer)
+                 User (nikhil) + Role (LSM)
+                 Group (learner) + Role (learner)
 
+www.simplilearn.net -> login -> learner -> start and end lab
 
+Kubernetes Permissions: 
 
+CRUD - create, read, update, delete
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-NAMESPACE:  
-
-kubectl get namespace or kubectl get ns
-example: if i have 5 worker nodes and i have diff apps to deployed on the worker nodes, i have to 
-provide a capacity for all of them to run 
-to group resources we have to craete namespaces
-kubectl create ns insta
-kubectl create ns meta 
-kubectl create ns whatsapp
-
-USES OF NAMESPACES: 
-1) same resources under 1 namespace - so when we create a deployment we create them inside the 
-namespaces
-2) set quota to restrict the resources 
-3) set roles or access restrictions - users under the namespace can only modify or view the resources 
-under their namespaces 
-
-kubectl apply -f <deployment-filename> -n <namepsacename> ()
-ex: kubectl apply -f deploy -n insta 
-
-kubectl get all -n <namepsacename> (shows all the resources under the namespace)
-kubectl delete ns <namespacename> (deletes the namespace)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Read - get, describe
+Delete - delete
+Update - apply, set, scale
+Create - expose, run
 
 
 

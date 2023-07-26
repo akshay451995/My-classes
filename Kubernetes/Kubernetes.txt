@@ -1030,14 +1030,44 @@ kubectl create clusterrolebinding nodes-view-swami --clusterrole nodes-view --us
 
 kubectl get nodes --as swami
 
+TROUBLESHOOTING : 
+
+worker node is down not ready - 
+find out what services are down if docker is down or kubelet is down and restart them
+
+MASTER IS DOWN OR NOT READY : 
+
+if api server is down : 
+kubectl is not working... then use the docker commands to find out which of the docker contianer of 
+the master has stopped 
+docker logs <containerid>
+
+if docker is not working - to check the logs\
+
+sudo ls /var/log (this is where all the logs are getting stored)
+to get into a specified container log
+
+sudo ls /var/log/containers
+to see the log file of a specific container file
+sudo cat /var/log/containers/<container-file-name> 
+
+or 
+kubectl logs <podname> -n kube-system
+kubectl logs kube-apiserver -n kube-system
+
+QUOTA : 
+
+Compute, Network, Storage
+
+Compute - CPU memory
+to set the limits of usage of resources at a maximum we set quota
 
 
 
 
-
-
-
-
+CKA EXAM : 
+395$ - after registering we have 1 year time and then 2 attempts to clear the exam
+mocks - killer.sh
 
 
 

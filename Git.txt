@@ -356,6 +356,11 @@ and finalizing the final content.
 
 107) git log --oneline --graph   (you will get linear graph in this case) 
 
+TO REVERT THE CHANGES : 
+
+git log 
+git revert <commit-id>
+if you want to change the central repo also then we have to push
 
 
 gittest personal acces token -- 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

@@ -259,7 +259,7 @@ lets say we want to install dockers
 
 yum install docker 
 
-yum: yellow dog updater . YUM is the primary package management tool for 
+yum: yellow dog updater ' Modified . YUM is the primary package management tool for 
 installing, updating, removing, and managing software packages in Red Hat Enterprise Linux. 
 
 

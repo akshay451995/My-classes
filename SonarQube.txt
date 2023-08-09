@@ -1,0 +1,66 @@
+	SONARQUBE
+It is a Quality management tool. 
+Quality - 1) Code Quality, and 
+	2) Test Quality 
+using sonarqube we can manage code quality and test quality
+
+how to get quality reports of the code? 
+	- Peers Code review
+	- static code review
+Peers Code review - others review our code (this we are not going to learn about)
+
+Static code review - Code would review Code
+
+this code which would review the code is called RULE (Rule is nothing but a combined code)
+we have different rules to review the entire code 
+All these rules clubbed together are called as TOOL
+
+SCA - Static code analysis tool would review code --> generate reports and this report 
+contains --> what is the issue?, who made it?, when it was made/introduced?, how to fix it? 
+where is that line? 
+All this info is present in the report --> of single file --> of whole package
+
+	Releases of SonarQube : 
+		- Commmunity --> free --> Opensource
+		- Dev
+		- Enterprise
+		- Data center
+
+this tool is written in java: 
+		Pre - java 11
+	Company - SonarSource
+
+Why do we need it? 
+There are different developers using different languages like java, dotnet, python, etc
+for static analysis --> there are a lot of different types of reports being generated about 
+what is the issue, who made it, etc --> so that is why to manage these we need a management 
+tool --> 
+
+SonarQube Architecture : 
+
+Server
+
+Scanner --> Source Code --> Reports --> server
+
+Scanner runs on the source code and then the reports are published to the server --> this 
+is the workflow
+
+server --> is a dashboard --> in which we have :
+ 						- Rules
+						- Projects
+						- Issues
+						- Quality Profile
+						- Gate
+						- Admin
+						- Search - ElasticSearch
+		Backend: 
+			H2 - Trials
+			MSSQL
+			Oracle
+			Postgres
+
+Workflow --> the moment we run SCANNER on the SOURCE CODE-> Scanner downloads the rules --> 
+Applies on the SOURCE CODE --> for which we get reports --> this reports are sent to the 
+DATABASE --> and from the database you see the DASHBOARD
+
+RULES IS DEVELOPED BY SONARQUBE	

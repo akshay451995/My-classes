@@ -4,16 +4,25 @@ sudo hostnamectl set-hostname "k8s-master"     // Run this command on master nod
 sudo hostnamectl set-hostname "k8s-node-0"     // Run this command on node-0
 sudo hostnamectl set-hostname "k8s-node-1"     // Run this command on node-1
 
-2) Add the following in the /etc/hosts file in the master node
-<privateip> hostname
-
-3) Disable swap and Add Kernel Modules : (on all nodes)
 sudo swapoff -a
 
-sudo tee /etc/modules-load.d/containerd.conf <<EOF
-overlay
-br_netfilter
+Docker configuration on master and worker nodes : 
+
+cat <<EOF | sudo tee /etc/docker/daemon.json
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+"max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
 EOF
+sudo apt install docker.io -y
+sudo systemctl enable docker
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+sudo swapoff -a
 
 sudo modprobe overlay
 sudo modprobe br_netfilter
@@ -26,20 +35,6 @@ EOF
 
 sudo sysctl --system
 
-4) Install Containerd Runtime : (on All Nodes) 
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/docker.gpg
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-
-sudo apt update
-sudo apt install -y containerd.io
-
-containerd config default | sudo tee /etc/containerd/config.toml >/dev/null 2>&1
-sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
-
-sudo systemctl restart containerd && sudo systemctl enable containerd
-
-sudo systemctl status containerd
-
 5) Install Kubectl, kubelet and kubeadm : (on all nodes)
 
 sudo apt install -y apt-transport-https curl 
@@ -51,8 +46,8 @@ sudo apt update && sudo apt install -y kubelet kubeadm kubectl
 (on master)
 sudo kubeadm init 
 mkdir -p $HOME/.kube
-$  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-$  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 (on worker node)
 
@@ -67,3 +62,60 @@ kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/
 
 kubectl get nodes 
 (your cluster is ready)
+
+
+
+------------------------------------------------------------------------------------
+
+
+   1) sudo su
+    2  usermod -aG sudo labsuser
+    3  sudo usermod -aG sudo labsuser
+    4  sudo apt-get update
+    5  sudo apt-get install -y apt-transport-https ca-certificates curl
+    6  sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    7  echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+    8  sudo apt-get update
+    9  sudo apt-get install -y kubelet kubeadm kubectl
+   10  docker
+   11  sudo apt-get remove docker docker-engine docker.io containerd runc
+   12  sudo apt-get install     apt-transport-https     ca-certificates     curl     gnupg     lsb-release
+   13  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+   14  echo   "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+   15    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+   16  sudo apt-get update
+   17  sudo apt-get install docker-ce docker-ce-cli containerd.io
+   18  sudo usermod -aG docker labsuser
+   19  whoami
+   20  docker
+   21  kubeadm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

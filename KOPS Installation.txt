@@ -1,0 +1,71 @@
+	
+
+create a new role : 
+
+inside the role in aws service --> select ec2 and click on next --> now attach 4 policy --> 
+select amaonec2full, iamfull, s3full, route53full --> these 4 shall be attached to the Kops 
+ec2-server --> Now give a name to the role as kops-master--> and then save it
+Go to ec2- dashboard and then select the instance --> now attach the role to this ec2
+to attach --> right click on the server in the ec2 dashboard and then select security -->
+modify iam role --> and attach your created role 
+
+sudo su
+hostname kopsmaster
+sudo apt install awscli -y
+aws configure
+add the details of aws configure
+access key: AKIA5WX5QRKKKVCDFDUF
+secret access key: GtNwtAmRW7VXCPLND9pbzPJEaveqkK5mxmE8yQtT
+default region name - ap-south-1
+output format: json
+<access part is done>
+
+
+we have to also setup route 53 :
+route53 : we can create domain names through this service
+copy the vpc id and availability zone from the ec2 instance 
+
+now search route53 in your aws console
+inside route53 dashboard click on create hosted zone --> 
+give domain name - akshay.com
+select - private hosted zone 
+select region and paste vpc id and click on create hosted zone 
+
+curl -Lo kops https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
+chmod +x ./kops
+sudo mv ./kops /usr/local/bin/
+aws s3 mb s3://clusters.dev.akshay.com
+export KOPS_STATE_STORE=s3://clusters.dev.akshay.com
+vi /etc/profile
+(run the above line in command line as well as add into the /etc/profile file in the last line)
+
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+curl -LO "https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+chmod +x kubectl
+mkdir -p ~/.local/bin
+mv ./kubectl ~/.local/bin/kubectl
+kubectl version --client --output=yaml
+ssh-keygen (use all default values)
+
+sudo apt install docker.io -y
+
+kops create cluster --zones=ap-south-1a clusters.dev.akshay.com --dns-zone=akshay.com --dns private
+
+Suggestions:
+ * list clusters with: kops get cluster
+ * edit this cluster with: kops edit cluster clusters.dev.akshay.com
+ * edit your node instance group: kops edit ig --name=clusters.dev.akshay.com nodes-ap-south-1a
+ * edit your control-plane instance group: kops edit ig --name=clusters.dev.akshay.com control-plane-ap-south-1a
+
+Finally configure your cluster with: kops update cluster --name clusters.dev.akshay.com --yes --admin
+ 
+Changes may require instances to restart: kops rolling-update cluster
+
+Suggestions:
+ * validate cluster: kops validate cluster --wait 10m
+ * list nodes: kubectl get nodes --show-labels
+ * ssh to a control-plane node: ssh -i ~/.ssh/id_rsa ubuntu@
+ * the ubuntu user is specific to Ubuntu. If not using Ubuntu please use the appropriate user based on your OS.
+ * read about installing addons at: https://kops.sigs.k8s.io/addons.

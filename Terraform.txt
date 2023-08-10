@@ -29,8 +29,8 @@ key_name = "keyname"
 
 
 
-Access Key - AKIA5WX5QRKKCDYLJGFR
-Secret Key - 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
+AKIA5WX5QRKKAMYFOR5X
+O6hSYhkui6fdAUJmR8w7u7jpCwP0VKvHHPFO+Bav
 
 
 

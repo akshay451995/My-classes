@@ -363,7 +363,7 @@ git revert <commit-id>
 if you want to change the central repo also then we have to push
 
 
-gittest personal acces token -- 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
+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
 
 
 

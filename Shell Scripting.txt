@@ -1,0 +1,949 @@
+	SHELL SCRIPTING 
+
+text processing tools : 
+find 
+grep
+head 
+tail
+sed
+sort
+uniq
+echo
+tr
+awk
+cut
+stderr
+stdout
+
+FIND COMMAND : 
+
+if we dont know the location of the file then in the entire system we can search using : 
+(if we know the path then we can give the nearest path we know of the file in place of /)
+find / -name <filename>
+find / -name os-release
+find / -name *.sh (shows all the files with .sh extension)
+find / -name *.yaml (shows all the files with .yaml extension)
+find / -user ec2-user (shows all the files and directories owned by the ec2-user)
+to check the owner : ls -l <filename>
+find / -user ec2-user -type f (shows only all the files owned by the ec2-user)
+find / -user ec2-user -type d (shows only all the directories owned by the ec2-user)
+
+we can search files and folders based on location, name, format, time, size, permissions, 
+ownerships
+
+GREP : 
+
+cat /etc/os-release
+if we want only a single output we need we can use grep command
+cat /etc/os-release | grep VERSION
+rpm -qa | grep java 
+ps -ef (shows all the processes running)
+if we want to see only specific keywords
+ps -ef | grep tomcat (shows only the tomcat output)
+
+if we dont know the keyword is in uppercase or lowercase we can use -i
+cat /etc/os-release | grep -i version
+
+for finding keywords inside the file we can also use cat along with another way : 
+grep <keyword> -i <filename>
+to print only the exact keyword that i have given - -w can be used (if there are words like 
+test, tester,etc)
+cat /etc/os-release | grep -w test
+we can also use -w -i in cobination for case sensitive words : 
+cat /etc/os-release | grep -w -i test 
+
+HEAD AND TAIL : 
+ps -ef (shows all the processes running)
+ps -ef | head -n <numberoflinesyouwant> 
+ps -ef | head -n 10 (prints 10 lines from the top of the output)
+
+cat file1 | head -n 1 (shows the 1st line inside the file)
+
+ps -ef | tail -n <numberoflinesyouwant> 
+ps -ef | tail -n 10 (prints 10 lines from the bottom of the output)
+cat file1 | tail -n 1 (shows the last line inside the file)
+
+SED : 
+we can search and replace keywords in a file without opening the file
+By default it replcaes the first occurence of the keyword . use g(global) to replace all the 
+keywords
+sed -i "s/<keyword>/<new-keyword>/gi" <filename>
+
+ECHO : 
+prints any keyword we want
+
+echo hi 
+echo "hello world"
+
+SORT : 
+
+vi file 
+akshay
+nitin 
+anita 
+ashok 
+sruthi 
+sreeyansh
+arjun
+akshay
+devops 
+sonarqube 
+nexus 
+:wq
+
+if i want to sort the file output 
+sort <filename>
+sort <filename> | uniq (to sort the file and remove the duplicate keywords if there are any)
+
+TR : 
+we can translate any key to another key (ex: small letters to caps and vice-versa)
+
+cat <filename> | tr [a-z] [A-Z] (tranlsate all the small letters in the file to caps)
+cat <filename> | tr [a-z] [A-z] (try this also)
+
+AWK : 
+
+free -m (shows the memory output)
+if i want to automate the memory output : 
+
+free -m | grep -i mem | awk -F ' ' '{print $7 }' (greps the mem line and prints only the 7th 
+column output with awk print command)
+
+uname -a | awk -F ' ' '{print $3}'
+uname -a | awk -F ' ' '{print $3}' | awk -F '.' '{print $5}'
+uname -a | awk -F ' ' '{print $3}' | awk -F '.' '{print $1,$5}'
+
+cat /etc/passwd 
+
+(Note: the command line where we type our commands is called shell prompt
+ shell is nothing but interphase between you and kernel) 
+it is a program between the kernel and the user - it takes the input from 
+the user and when i press enter, it will interpret the human readable 
+language into machine language and send it to kernel) 
+
+cat /etc/shells 
+(by default every user will get bash)
+echo $SHELL
+env 
+cat /etc/passwd | awk -F ':' '{print $1}' (prints only the usernames)
+cat /etc/passwd | awk -F ':' '{print $1,$6}'
+cat /etc/passwd | awk -F ':' '{print $1,"user home directory is",$6}' (to 
+print the data in between the output)
+df -h |awk -F ' ' '{print $6}' | tail -n 6 (prints only the names of lower 6 
+lines) 
+ifconfig eth0
+ifconfig eth0 |head -n 2 |tail -n 1| awk -F ' ' '{print "eth0 ip address is",$2}'
+(to print the output as eth0 ip address is <ip address>)
+ifconfig eth0 | head -n 2 | xargs| awk -F ' ' '{print $1, "ip address is", $6}'
+(by using xargs we can get all the output of a command in a single line )
+
+CUT : 
+
+(cut is same as awk)
+awk will consider consecutive spaces as one space but cut will consider and count each and 
+every space
+to extract the columns from a line or output, we use cut 
+free -m |grep Mem|cut -d ' ' -f
+
+STDOUT OR STDOUTPUT : 
+
+the outputs of the commands we run are called stdout
+
+in realtime we may have use with the output, if we want to store the output of a command 
+anywhere 
+
+ps -ef > /tmp/file1 (to store the output of ps -ef in a file in /tmp/file1)
+
+if we do not want the output to be stored in a file, as well as i dont want the output to 
+display on the screen : 
+
+ps -ef > /dev/null (any data which is stored in the /dev/null will get nullified, it will 
+not get stored)
+
+Notes : when you run any command the output will be sent to the screen, that is called as 
+stdout. while we are writing the shell script we can redirect this stdout to the different 
+files for future purpose
+
+
+STDERR OR STDERROR :
+
+errors while we run any command are called as errors
+if we also want to save an error output also in real time
+ex: if we do not have a file called f2 but we do ls f2
+ls f2 - an error stating that there is no such file or directory \
+
+if we want to save this ouput into a file 
+ls f2 2> f3 (to store the error output onto f3 file)
+
+if i dont want to see that error output or store it :
+ls f2 2> /dev/null
+
+Notes: when we run any command the error will be sent to the screen which is called as stderror.
+while you are writing the shell script we can redirect this stderror to the different file 
+for future purpose
+
+if we have one of the output that is correct and other output maybe error: 
+we have only one file f1 and if we pass a command ls f1 f2, since we do not have f2 only one 
+command returns the output and other returns as error, if we want to save both of them onto 
+a file : 
+ls f1 f2 > f4 2> f5 
+
+> - is for stdoutput
+2> - is for stderror
+
+another use case 
+ls f1 f2 >> f4 2>> f5 (appends the same output data onto the same files)
+
+> - overwrites the data
+>> - appends the data onto the files
+
+SHELL SCRIPT : 
+how to write a shell script? 
+extensions like .sh are given generally for shell script 
+(it is not mandatory but for identification purpose we give .sh)
+if we see the file we can understand that it is shell script. 
+
+what is shell script - we write shell script programs for reusability purpose
+multiple commands if we make it in a file that is called as shell script 
+we can run all the commands together, giving all the commands in one file and executing the 
+file is enough
+
+what is shell? what is its purpose? 
+shell is nothing but an interface which is taking the input given by us (commands) 
+shells is an interface between the user and the kernel - it will take user inputs and send 
+it to the kernel and gives the kernel ouputs to the user 
+there are multiple shells in the market - but the default shell is /bin/bash
+other shells - c-shell, k-shell
+u can see the shells in cat /etc/shells (these are the shells that our available in our 
+system)
+difference between different shells - developers are different, functionality is the same
+a shebang sequence (#!) is a special line at the beginning of a script that tells the 
+operating system which interpreter to use when executing the script
+
+Example pattern for shell script files: 
+vi sample.sh 
+
+#!/bin/bash
+expr 1 + 2
+(save and exit)
+ls -l
+we have to give file execution permission for all shell script file : 
+chmod +x <filename>
+chmod +x sample.sh
+
+how to run shell script? 
+pwd
+give full path of the file and the shell script file runs 
+<path-of-file>/<script-filename>
+or we can go into the folder where the script file is present 
+./<script-filename> 
+./sample.sh
+or another way 
+sh <script-filename>
+sh sample.sh
+or if we are in another folder
+sh <path-of-file>/<script-filename>
+
+VARAIBLE CONCEPT  : 
+
+if a key has multiple values it is called as variable 
+
+variable concept in shell script : 
+
+vi sample.sh
+
+#!/bin/bash
+a=5
+b=10
+expr $a + $b
+
+if it is not a regular change in values, then we use local variables like this 
+local variable - if we define the vlaues within the script it is called local variable 
+ex: month defining variable - which has to be changed monthly once 
+
+if there is a dollar prefix - that is a variable ($)
+
+DEBUGGING : 
+vi sample.sh
+
+#!/bin/bash
+set -x
+a=5
+b=10
+expr $a + $b
+
+executing this script will give a line by line description of the script (debugging the 
+complete script)
+or we can also run debug mode in command line by : 
+sh -x sample.sh (this command runs the script in debug mode)
+
+RUNTIME VARIABLE- once we execute the shell script it will take the user inputs
+when we do not have regular values, or the users have different values queries then we use 
+runtime variables
+
+vi sample.sh
+#!/bin/bash
+echo "please provide value for a"
+read a
+echo "please provide value for b"
+read b
+echo "the value of a + b is "
+expr $a + $b
+(save and exit)
+
+now run the above script :
+and it will ask to provide the value for a and then the value for b and it will calculate 
+and give the amount 
+
+POSITIONAL PARAMETERS/ COMMANDLINE PARAMETERS : 
+
+if the values are a choice values then we use positional parameters
+vi sample.sh
+#!/bin/bash
+a=$1
+b=$2
+expr $a + $b
+(save and exit)
+now execute the file: 
+./sample.sh 10 15 
+in this command - .sample.sh is in '0' position, 10 is in '1' position, 15 is in '2' 
+position
+so the expression in file is 
+now in debug mode run the command
+bash -x sample.sh 10 15 
+
+we are giving values based on the position in the commandline - that is why they are called 
+poitional parameters 
+
+Notes : positional parameters - we can pass our variables in commandline
+
+OUTPUT VARIABLE : 
+
+if we get the values from command output and store it into a key, that is called as output 
+variable
+free -m 
+free -m |grep -i mem
+free -m |grep -i mem | awk -F ' ' '{print $7}' (to print only available memory output)
+
+now copy the above command : 
+vi mem.sh
+#!/bin/bash
+memory=`free -m |grep -i mem | awk -F ' ' '{print $7}'`
+echo "my available memory is $memory"
+(we have to give back quote "`" at the beginning and ending of the command to give a hint to 
+shell that this is the command)
+now execute the file : bash mem.sh
+
+ENVIRONMENT VARIABLE : 
+for global [entire system] values - /etc/profile
+for user level values - ~/.bash_profile ('~' - this means the home directory of that 
+particular user)
+if we want same variable for multiple script (example - JAVA HOME PATH)
+if we run 20 scripts and we want them to know the path of our java for the scripts to run 
+we can also set them user level also - like whenever that user is running the script by 
+default it takes that variable (or location in this example)
+every user has his own bash profile 
+vi /root/.bash_profile 
+(go to end of the file to the line before export PATH and add this)
+
+a=25
+export PATH a
+
+source .bash_profile (this will read and apply the changes to the file)
+echo $a
+and the value of 25 will print with root user - by this we do not have the need to define 
+this variable always inside the scriptfile 
+
+now if we want the variable to execute irrespective of user - all users need the same value
+of variable, then: 
+
+vi /etc/profile
+(go to last line)
+b=100
+export b
+(save and exit)
+source /etc/profile (this will read and apply the changes to the file)
+echo $b
+and the value of 25 will print with any user - by this we do not have the need to define 
+this variable always inside the scriptfile 
+
+
+EXECUTING SHELL SCRIPTS : 
+
+sh -x mem.sh
+df -h
+df -h /
+df -m / 
+df -m /|grep dev
+df -m /|grep dev|awk '{print $4}' 
+Note : in awk if we do not give -F it will take space only by default - so we need not give 
+' ' specifically for space 
+
+now copy the above command :
+vi mem.sh
+#!/bin/bash
+memory=`free -m |grep -i mem | awk -F ' ' '{print $7}'`
+root_storage=`df -m /|grep dev|awk '{print $4}'`
+echo "available storage is $root_storage"
+echo "my available memory is $memory"
+(now execute the shell script)
+
+df -m /|grep dev|awk '{print $5}'|awk -F '%' '{print $1}' (to print only the used percentage 
+without % sign)
+task : by df -h we get only use percentage output - what if i want available percentage 
+output
+vi mem.sh
+#!/bin/bash
+memory=`free -m |grep -i mem | awk -F ' ' '{print $7}'`
+root_storage=`df -m /|grep dev|awk '{print $5}'|awk -F '%' '{print $1}'`
+available_storage_percentage=`expr 100 - $root_storage` 	
+echo "available storage percentage is "
+echo "my available memory is $memory"
+
+task : in free -m command it shows available mem - but i want available percentage
+
+availabe_memory=`free -m | grep -i mem | awk '{print $7}'`
+total_memory=`free -m |grep -i mem | awk '{print $2}'`
+available_memory_percentage=`expr $available_memory / $totalmemory`
+echo "available memory percentage is $available_memory_percentage"
+
+CONDITION BASED SHELL SCRIPT : 
+
+by default our shell has multiple options which are called  - switches
+by default shell script will execute all the lines one by one. but based on condition also 
+we execute or we can skip 
+few commands used in if condition.
+
+syntax of condition based file : 
+
+if [condition]
+then 
+truestatement 
+else 
+falsestatement
+fi
+
+Explanation : 
+if confition is true then execute the command in the true statement and if the condition is 
+false then run the falsestatement command
+
+vi if.sh
+#!/bin/bash
+if [ -f $1]
+then 
+	echo "$1 file exists"
+else 
+	echo "$1 is not a file or $1 does not exists"
+fi
+Note : here -f is switch 
+
+chmod +x if.sh
+./if.sh /etc
+or sh -x if.sh /etc
+Output - /etc is not a file or /etc does not exists
+
+google - bash switches 
+
+-s switch is used for - if the condition is true delete it if false do not delete it 
+-z switch is used if the parameter is not provided in the command line, it asks us to 
+provide 
+vi if.sh
+#!/bin/bash
+if [ -z $1]
+then 
+	echo "please provide atleast one positional parameter"
+	exit 
+fi
+if [ -f $1]
+then 
+	echo "$1 file exists"
+else 
+	echo "$1 is not a file or $1 does not exists"
+fi
+(save and exit)
+sh -x if.sh (runs the script)
+
+if i want to run the script only if i am a specific user - 
+
+vi if.sh
+#!/bin/bash
+user=`whoami`
+if [ $user != root ]
+then 
+	echo "please run as root user. only admin can run this command"
+	exit
+fi
+if [ -z $1]
+then 
+	echo "please provide atleast one positional parameter"
+	exit 
+fi
+if [ -f $1]
+then 
+	echo "$1 file exists"
+else 
+	echo "$1 is not a file or $1 does not exists"
+fi
+exit
+(save and exit the file)
+
+run this script as ec2-user./if.sh
+output - please run as root user. only admin can run this command
+sh -x if.sh (gives script in debug mode)
+
+if i want to execute only if the os is amazon linux - how to do this? 
+cat /etc/os-release |xargs |awk -F '=' '{print $2}'| awk '{print $1, $2}'
+vi if.sh
+#!/bin/bash
+os=`cat /etc/os-release |xargs |awk -F '=' '{print $2}'| awk '{print $1, $2}'`
+if [ $os = "Amazon" ]
+then 
+	echo "please use yum package"
+else 
+	echo "please use apt package"
+fi
+if 
+user=`whoami`
+if [ $user != root ]
+then 
+	echo "please run as root user. only admin can run this command"
+fi
+if [ -z $1]
+then 
+	echo "please provide atleast one positional parameter"
+fi
+if [ -f $1]
+then 
+	echo "$1 file exists"
+else 
+	echo "$1 is not a file or $1 does not exists"
+fi
+exit
+(save and exit the file)
+
+COMMON SHELL SCRIPTS FOR IF CONDITIONS : 
+
+Run all these commands in debug mode to get clear picture : 
+
+if [[ "${rhel}" != @(Amazon|Red|Fedora|CentOs) ]]
+then 
+echo "os type is not permitted [ $rhel ]"
+exit
+else echo "os name is rhel"
+fi
+Explanation : if any of these condition is satsfied execute this command, use case for 
+yum package manager  works only on RHEL
+
+if [ $os = Amazon ] || [ $os = Redhat ] || [ $os = CentOS ]
+then 
+echo "os is redhat family"
+else 
+echo "os is not redhat family"
+fi
+Explanation : same as above condition || indicates if any one of the condition is true to 
+execute the command
+
+if [ $os = Redhat ] && [ $version == 6 ] &&
+then 
+echo "$os is old version , so we have to upgrade"
+else 
+echo "$os is not redhat family"
+fi
+Explanation : && is given if both values are satisfied then only apply the command
+
+if [ $os = Amazon ]
+then 
+echo "this is Amazon"
+elif [ $os = Redhat ]
+then
+echo "this is Redhat"
+elif [ $os = CentOS ]
+then 
+echo "this is CentOS"
+else 
+echo "this is ubuntu"
+fi
+Explanation : if there are multiple true statements we run this above script
+
+to know if the command output is successful and to convey it to the shell script : 
+
+if 0 is the output then it indicates that the command is successful, if anything other than 
+0 is the output then command is failed 
+id akshay 
+echo $? or $? (if the above command is successful then this will return output 0)
+id akshay1 
+echo $? (if the above command is not successful then this will return output non-zero)
+
+to give it in script - id akshay | $?
+#!/bin/bash
+id akshay > /dev/null
+if [ $? = 0 ]
+then
+        echo "successful"
+else
+        echo "user not present"
+fi
+
+CASE CONDITION : 
+
+#!/bin/bash
+FRUIT="$1"
+case "$FRUIT" in 
+   "apple") echo "Apple pie is quite tasty."
+   ;;
+   "banana") echo "I like banana nut bread."
+   ;;
+   "kiwi") echo "New Zealand is famous for kiwi."
+   ;;
+   *) echo "please provide proper input "
+   ;;
+esac
+(here * indicates any ouput other than the fruit-names given)
+
+(or) 
+
+(same in if condition : )
+if [ $1=apple ]
+then 
+	echo "Apple pie is quite tasty."
+elif [ $1=banana ]
+then	
+	echo "I like banana nut bread."
+elif [ $1=kiwi ]
+then	
+	echo "New Zealand is famous for kiwi."
+else
+	echo "please provide proper input "
+fi
+
+Explanation: any command can be give in place of echo. here apple, banana and kiwi are 
+inputs, if we give apple it will execute the first statement command, if banana it executes 
+the banana statement command
+
+execute script : sh -x <scriptname.sh> apple
+
+TO DELETE ALL FILES ONLY OTHER THAN LATEST 2 FILES : 
+cd /tmp
+touch a b c d e f g
+mkdir abc xyz klm pqr
+now again touch h i j k l 
+mkdir mno def 
+ls -lrt (previous to latest created files) or ls -lt  (latest to previouscreated files) 
+shows timewise creation of files
+if i want only latest 2 files whenever i ask and all the remaining older files should get 
+deleted : 
+rm -f $(ls -lrt | grep -v script.sh | grep -v '^d'| head -n -2| awk '{print $9}')
+Explanation : grep -v skips the files to be deleted, '^d' is for skipping directories, -2 is 
+for skipping the top 2 files awk is for printing only the filename 
+
+
+FOR LOOP : 
+
+useradd akshay 
+(i want to print only the user id of akshay)
+
+id akshay 
+id -u akshay (shows only the id number for the user)
+vi user.sh 
+#!/bin/bash
+user="$1"
+id $1 > /dev/null
+if [ $? = 0 ]
+then
+        id -u $1
+else
+        sudo useradd $1
+        echo "user $1 created"
+        id -u $1
+fi
+(or)
+#!/bin/bash
+user="$1"
+id $1 > /dev/null 2> /dev/null
+if [ $? = 0 ]
+then
+ID=`id -u $1`
+echo "$1 user id is $ID"
+else
+        sudo useradd $1
+ID=`id -u $1`
+echo "$1 user id is $ID"
+fi
+(2> here is to also move the error output into the null file)
+(save and exit)
+sh user.sh akshay
+sh user.sh anita
+
+For 1 user this can be done, but what if i have 10 users - i can do this by using for loop
+
+FOR-LOOP SYNTAX:
+
+for key in `cat <filename>` 
+do 
+commands 
+done
+
+(list all the users in the filename or number of arguement, or number of servers u want to 
+run in)
+
+#!/bin/bash
+for i in `echo $*` #for i in "anita nitin"
+do 
+id $i > /dev/null 2> /dev/null
+if [ $? = 0 ]
+then
+ID=`id -u $i`
+echo "$i user id is $ID"
+else
+        sudo useradd $i
+ID=`id -u $i`
+echo "$i user id is $ID"
+fi
+done
+
+execute the script - sh -x user.sh ashok anita nitin sreeyansh sonu 
+
+(or)
+vi userlist
+ashok
+anita 
+nitin
+sreeyansh 
+shruthi
+arjun
+sonu
+
+IN THIS CASE:
+#!/bin/bash
+for i in `cat userlist` #for i in "anita nitin"
+do 
+id $i > /dev/null 2> /dev/null
+if [ $? = 0 ]
+then
+ID=`id -u $i`
+echo "$i user id is $ID"
+else
+        sudo useradd $i
+ID=`id -u $i`
+echo "$i user id is $ID"
+fi
+done
+
+execute the script - sh -x user.sh 
+
+
+
+
+
+TASKS: 
+1) find out files which are created one week back.
+2) find out files which are modified since one week 
+3) find out files which are accessed since one week
+4) find out files which are less than 10mb
+5) find out files which are more than 5mb and less than 10mb
+
+GREP - 
+6) How many occurences my keywords is present in output 
+7) in which line my keyword is available (print line number)
+8) print non matching lines (not with keyword)
+9) print mathcing line and the line above that
+10) print mathcing line and the line below that
+11) i have a folder consisting multiple files, with names like file1, file2, file3 
+... file100, In each and every file i want to print if a <specific keyword> is there or not
+
+HEAD AND TAIL - 
+12) exclude the first 2 lines and print remaining lines
+13) exclude the last 2 lines and print the remaining lines
+
+SED - 
+14) how to delete empty lines
+15) only from 10th line to 15th line i want to search and replace the keyword
+16) only search and replace <keyword> in which line another <keyword> is also present 
+
+SORT - 
+17) we can sort our outputs in ascending and descending order, can be alphabet or numeric
+
+AWK -
+18) every line last word i need 
+19) print last but one word in every line
+20) print how many words in every line
+21) print last word only from line where <specific-keyword> is there
+22) print adjacent word to <specific keyword> in every line
+23) in every line last word, how many characters are there
+24) in every line last word, how many times 'r' characters is there
+25) in every line last word, what is the position of the 'r' character
+
+TASKS - if condition - run all these tasks in same script : 
+1) check if minimum 500 mb ram
+2) check 500 mb storage in / filesystem and execute 
+3) check if it is redhat family or not - run only in redhat - centos or amazon or redhat and 
+execute
+4) how to ignore case sensitivity in if condition for the variable given
+
+vim editor tasks - how to add a keyword in everyline  from 2nd to 10th line ? 
+
+:[start line],[end line]s/^/# (to add comment to specific lines)
+
+:g/\<keyword>/s/^/#
+to comment out the lines that contain <keyword>
+
+:%s/^#/ (to uncomment all the lines in the file where the first letter is #)
+:s/^/# (to comment out specific selected lines)
+:<firstline-number>,<lastline-number>s/^/# (to comment out specific line number lines)
+:17,28s/^/# 
+
+to comment out specific lines :
+
+Press CTRL + V to enable Visual Mode.
+Using the up and down arrow key, highlight the lines you wish to comment out.
+Once you have the lines selected, press the SHIFT + I keys to enter insert mode.
+Enter your command symbol, for example, # sign, and press the ESC key. Vim will 
+comment out all the highlighted lines.
+in place of # you can also give keywords if you want
+
+google - nested if
+
+TASKS - FOR LOOP : 
+1) vi file1
+fruit: apple,banana,orange,
+vehicle: bus,car,scooter
+flowers: jasmine,rose,lily,lotus
+if i give apple in positional parameter it should print apple is a fruit 
+if i give bus then it should print bus is a vehicle 
+if i give apple and bus then it should print apple is fruit, bus is vehicle
+ex: ./scriptname apple bus apple rose
+(apple is a fruit 
+bus is a vehicle 
+rose is a flower
+but apple should not be printed twice)
+2) find out if the given parameter is string or integer 
+(if input is 1 = it should print integer
+if input is amar = it should print string)
+3) find out the given parameter is palindrome or not 
+4) print 1 to 100 (or any range) all numbers 
+5) print all odd numbers in given range
+6) print all even numbers in given range 
+7) print 1 to 100 except given number ex:59
+
+TASKS: 
+1) i have a folder, in that i have any extension file, ex: .jpg, .yaml files, for all of them 
+i want to add .sh extension, i.e., we have to replace .jpg or .yaml extension to .sh
+A) $ for i in $( ls *.txt ); do mv $i ${i%.*}; done (to remove a specific extension in place 
+of .txt u can give anything and also add multiple extensions to remove them)
+for i in $( ls *.* ); do mv $i ${i%.*}; done (to remove extensions of all the files in the 
+folder)
+ex: for i in $( ls *.txt *.sh); do mv $i ${i%.*}; done (removes the extensions of the files)
+$ for i in $( ls ); do mv $i $i.txt; done (adds extensions for the files - give any extension 
+in place of .txt)
+$ for i in $( ls *.log ); do mv $i $i.txt; done (adds .txt extension for all the .log files)
+A) vi rename.sh
+#!/bin/bash
+for i in $( ls *.*); do mv $i ${i%.*}; done
+for i in $( ls ); do mv $i $i.sh; done
+(save and exit)
+execute the script
+
+2) i have multiple folders with different files, now i need files where inside file amar 
+keyword is present 
+example: file1, file2, file3 - print only files where amar keyword is there 
+A) grep -lir <keyword> *
+Example - grep -lir Akshay *
+Explanation: here -l is to search for test 
+	-i is given for case sensitive search 
+	-r is to search recursively for current directory and subdirectories in which the 
+	keyword maybe present
+	- Akshay is the keyword
+	- * is to search all the files in current directory and subdirectories 
+	(u can give filenames in place of *) 
+For using this is script : 
+vi key.sh 
+#!/bin/sh
+grep -lir $1 *
+(save and exit)
+Execute the command by using sh key.sh <keyword>
+
+3) how to copy a file from windows to linux, 
+A) create a user with password in the linux server (username with password is a must)
+download winscp for windows inside the windows machine and copy the file you want to copy into desktop 
+now run cmd prompt in windows 
+inside cmd - 
+cd Desktop
+scp <keyname.pem> username@public-ipaddress:<folder-u-want-to-copy-in> (to copy pem key from windows 
+to linux machine)
+ex: scp akshay.pem akshay@<public-ip>:~/ (to copy in home directory of akshay user)
+in password prompt - type password
+now from that machine if u want to login to other servers which are launched using the same pem key - 
+change the permissions of the pem key so that it remains secure : this step is a must 
+chmod 400 /path/to/private_key.pem
+ssh -i <keyname.pem> username@public-ipaddress
+To copy any file from windows to linux : 
+scp <filename> username@privateipaddress:<path-of-folder-u-want-to-copy-in>
+
+4) i have 3 ec2 instances, from 1 ec2 instance i want to verify remaining servers kernel 
+version without login and only using shell script 
+hint: for loop, i have to make all server list in a file and i have to make for loop , 
+assuming we have same key 
+ssh -i <keyname.pem> username@ipaddress
+(we should not login to each servers, we have the keys in our laptop - copy the file from 
+windows to linux)
+A) vi ssh-script.sh
+#!/bin/bash
+for i in `cat server-list`;  #for i in "username@public-ipaddress"
+do
+kernel_version=`ssh -i akshay.pem $i 'uname -v'`
+echo "kernel version of $i is $kernel_version"
+done
+
+vi server-list
+ec2-user@13.233.197.91
+ec2-user@13.235.134.115
+ubuntu@52.66.209.72
+(add username@public-ipaddresses)
+
+chmod +x ssh-script.sh
+sh ssh-script.sh
+
+5) how to copy a file from linux to linux - create 3 instances
+scp -p akshay@3.110.147.0:/home/akshay/akshay.pem akshay@13.126.230.232:~/
+scp -p username@<public-ip-of-host-machine>:path-of-pem-key username@<public-ip-of-dest-machine>:<path-of-pem-key> 
+
+
+6) emi task
+A) emi loan calculator task : 
+#!/bin/bash
+
+echo "please provide value for principal_amount"
+read p
+echo "please provide value for rate_of_interest_per_annum"
+read R
+echo "please provide value for duration_in_years"
+read T
+t=`echo "scale=4; $T * 12" | bc`
+r=`echo "scale=4; $R / 1200" | bc`
+expr1=`echo "scale=4; $p * $r" | bc`
+expr2=`echo "scale=4; 1 + $r" | bc`
+expr3=`echo "$expr2 ^ $t" | bc`
+expr4=`echo "scale=4; $expr3 - 1" | bc`
+expr5=`echo "scale=4; $expr1 * $expr3" | bc`
+expr6=`echo "scale=4; $expr5 / $expr4" | bc`
+echo "your monthly emi is $expr6"
+
+###########################################################
+Q) i have 3 ec2 instances, from 1 ec2 instance i want to verify remaining servers kernel 
+version without login and only using shell script 
+hint: for loop, i have to make all server list in a file and i have to make for loop , 
+assuming we have same key 
+A) if we have only amazon linux machines with ec2-user : 
+vi script.sh
+#!/bin/bash
+for i in `cat hostname`; do  #for i in "public-ipaddress"; do
+for b in `cat username`; do
+kernel_version=`ssh -i akshay.pem $b@$i 'uname -v'`
+echo "kernel version of $i is $kernel_version"
+done
+done
+
+vi username
+ec2-user
+vi hostname
+<public-ipaddress>
